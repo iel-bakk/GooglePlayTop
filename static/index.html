@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google Play – Top 100 Apps</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a1c2e 0%, #2d1f4e 100%);
+      padding: 28px 32px 18px;
+      text-align: center;
+      border-bottom: 2px solid #7c3aed;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      color: #a78bfa;
+      letter-spacing: .5px;
+    }
+    header p {
+      margin-top: 6px;
+      font-size: .9rem;
+      color: #9ca3af;
+    }
+
+    /* ── Tab Bar ───────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 16px 24px;
+      background: #13151f;
+    }
+    .tab-btn {
+      padding: 8px 20px;
+      border: 1px solid #374151;
+      border-radius: 999px;
+      background: transparent;
+      color: #9ca3af;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-btn:hover { border-color: #7c3aed; color: #c4b5fd; }
+    .tab-btn.active {
+      background: #7c3aed;
+      color: #fff;
+      border-color: #7c3aed;
+    }
+
+    /* ── Main ──────────────────────────────────────────────── */
+    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+    .section-title {
+      font-size: 1.3rem;
+      color: #c4b5fd;
+      margin-bottom: 16px;
+    }
+
+    /* ── Loading / Error ───────────────────────────────────── */
+    .loading, .error {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 1.1rem;
+    }
+    .loading { color: #7c3aed; }
+    .error   { color: #ef4444; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #1e1e2e;
+      border-top-color: #7c3aed;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Card Grid ─────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color .2s, transform .15s;
+    }
+    .card:hover {
+      border-color: #7c3aed;
+      transform: translateY(-2px);
+    }
+
+    .rank {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #7c3aed;
+      min-width: 30px;
+      text-align: center;
+    }
+    .rank.top3 { color: #facc15; font-size: 1.3rem; }
+
+    .icon {
+      width: 52px; height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #272a3a;
+    }
+
+    .info { flex: 1; min-width: 0; }
+    .info .name {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #e5e7eb;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .info .dev {
+      font-size: .78rem;
+      color: #9ca3af;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .meta {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .meta .installs {
+      font-size: .8rem;
+      color: #a78bfa;
+      font-weight: 600;
+    }
+    .meta .rating {
+      font-size: .78rem;
+      color: #facc15;
+      margin-top: 4px;
+    }
+    .meta .genre {
+      font-size: .7rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    a.card-link { text-decoration: none; color: inherit; }
+
+    /* ── Keyword Pills ─────────────────────────────────────── */
+    .keywords-section {
+      margin-bottom: 32px;
+    }
+    .keywords-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .kw-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: .85rem;
+      color: #c4b5fd;
+      transition: border-color .2s, transform .15s;
+    }
+    .kw-pill:hover {
+      border-color: #7c3aed;
+      transform: translateY(-2px);
+    }
+    .kw-rank {
+      font-weight: 700;
+      color: #7c3aed;
+      font-size: .8rem;
+    }
+    .kw-name {
+      font-weight: 500;
+    }
+    .kw-count {
+      font-size: .72rem;
+      color: #6b7280;
+    }
+
+    /* ── Footer ────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: .75rem;
+      color: #4b5563;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.3rem; }
+      .modal-body { padding: 20px; max-width: 100%; }
+      .detail-screenshots { gap: 8px; }
+      .detail-screenshots img { height: 160px; }
+    }
+
+    /* ── Detail Modal ──────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+      overflow-y: auto;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-body {
+      background: #1a1c2e;
+      border: 1px solid #374151;
+      border-radius: 16px;
+      max-width: 720px;
+      width: 100%;
+      padding: 28px 32px;
+      position: relative;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px; right: 18px;
+      background: none; border: none;
+      color: #9ca3af;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color .2s;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .detail-header {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .detail-header img {
+      width: 72px; height: 72px;
+      border-radius: 16px;
+      object-fit: cover;
+      background: #272a3a;
+    }
+    .detail-header .detail-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+    .detail-header .detail-dev {
+      font-size: .85rem;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+    .detail-header .detail-genre-badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #272a3a;
+      font-size: .72rem;
+      color: #a78bfa;
+    }
+
+    .detail-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .stat-card {
+      background: #13151f;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #c4b5fd;
+    }
+    .stat-card .stat-label {
+      font-size: .72rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .detail-description {
+      background: #13151f;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 18px;
+      max-height: 260px;
+      overflow-y: auto;
+      font-size: .85rem;
+      line-height: 1.6;
+      color: #d1d5db;
+      white-space: pre-line;
+    }
+
+    .detail-screenshots {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+    }
+    .detail-screenshots img {
+      height: 200px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .detail-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .detail-footer a {
+      display: inline-block;
+      padding: 10px 24px;
+      background: #7c3aed;
+      color: #fff;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .detail-footer a:hover { background: #6d28d9; }
+    .detail-footer .detail-meta-info {
+      font-size: .72rem;
+      color: #6b7280;
+    }
+
+    /* ── Niche Finder ──────────────────────────────────────── */
+    .niche-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .niche-card {
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 12px;
+      padding: 18px;
+      transition: border-color .2s, transform .15s;
+      cursor: pointer;
+    }
+    .niche-card:hover {
+      border-color: #7c3aed;
+      transform: translateY(-2px);
+    }
+    .niche-card .niche-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #e5e7eb;
+      margin-bottom: 10px;
+    }
+    .niche-card .score-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: #272a3a;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .niche-card .score-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .5s;
+    }
+    .niche-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .niche-metric {
+      font-size: .75rem;
+      color: #9ca3af;
+    }
+    .niche-metric strong {
+      color: #c4b5fd;
+    }
+    .opportunity-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .opp-high   { background: #065f46; color: #34d399; }
+    .opp-medium { background: #713f12; color: #fbbf24; }
+    .opp-low    { background: #7f1d1d; color: #f87171; }
+
+    /* ── Toolbar ────────────────────────────────────────────── */
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .toolbar-btn {
+      padding: 6px 16px;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      background: #1a1c2e;
+      color: #9ca3af;
+      font-size: .78rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .toolbar-btn:hover {
+      border-color: #7c3aed;
+      color: #c4b5fd;
+    }
+
+    /* ── Snapshot diff ──────────────────────────────────────── */
+    .diff-section { margin-bottom: 20px; }
+    .diff-section h3 {
+      font-size: 1rem;
+      color: #c4b5fd;
+      margin-bottom: 8px;
+    }
+    .diff-item {
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      font-size: .82rem;
+    }
+    .diff-item .change-positive { color: #34d399; font-weight: 600; }
+    .diff-item .change-negative { color: #f87171; font-weight: 600; }
+
+    /* ── IP Blocked Modal ────────────────────────────────── */
+    .blocked-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0,0,0,.75);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .blocked-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .blocked-box {
+      background: #1c1e30;
+      border: 2px solid #f87171;
+      border-radius: 16px;
+      padding: 32px 28px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+    }
+    .blocked-box .blocked-icon { font-size: 3rem; margin-bottom: 12px; }
+    .blocked-box h2 {
+      color: #f87171;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+    .blocked-box p {
+      color: #d1d5db;
+      font-size: .88rem;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+    .blocked-box .countdown {
+      font-size: .82rem;
+      color: #9ca3af;
+      margin-bottom: 14px;
+    }
+    .blocked-box button {
+      padding: 8px 22px;
+      border-radius: 8px;
+      border: none;
+      background: #374151;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .blocked-box button:hover { background: #4b5563; }
+
+    /* ── Analysis / Compare ──────────────────────────────── */
+    .analysis-panel {
+      margin-bottom: 24px;
+    }
+    .compare-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+    .compare-form label {
+      font-size: .78rem;
+      color: #9ca3af;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .compare-form input, .compare-form select {
+      padding: 8px 12px;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      background: #1a1c2e;
+      color: #e0e0e0;
+      font-size: .85rem;
+      min-width: 220px;
+    }
+    .compare-form input:focus, .compare-form select:focus {
+      border-color: #7c3aed;
+      outline: none;
+    }
+    .compare-btn {
+      padding: 8px 20px;
+      background: #7c3aed;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .compare-btn:hover { background: #6d28d9; }
+
+    .compare-result {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 700px) {
+      .compare-result { grid-template-columns: 1fr; }
+    }
+    .compare-app-card {
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .compare-app-card .app-hdr {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .compare-app-card .app-hdr img {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+    }
+    .compare-app-card .app-hdr .app-title {
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+    .compare-app-card .app-hdr .app-dev {
+      font-size: .78rem;
+      color: #9ca3af;
+    }
+
+    .word-section {
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .word-section h3 {
+      font-size: .95rem;
+      color: #c4b5fd;
+      margin-bottom: 10px;
+    }
+    .word-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .word-chip {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 500;
+    }
+    .word-chip.shared  { background: #1e3a5f; color: #60a5fa; }
+    .word-chip.only1   { background: #3b1f5e; color: #c084fc; }
+    .word-chip.only2   { background: #1e3b3b; color: #34d399; }
+
+    .chart-container {
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+    }
+    .chart-container canvas {
+      max-height: 320px;
+    }
+    .overlap-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 700;
+      background: #272a3a;
+      color: #a78bfa;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📱 Google Play – Top 100 Apps</h1>
+  <p>Most downloaded &amp; popular apps this week</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-endpoint="/api/top">All</button>
+  <button class="tab-btn" data-endpoint="anime">🎌 Anime</button>
+  <button class="tab-btn" data-endpoint="niche-finder">🔍 Niche Finder</button>
+  <button class="tab-btn" data-endpoint="analysis">📊 Analysis</button>
+  <!-- category buttons injected dynamically -->
+</nav>
+
+<!-- IP blocked modal -->
+<div id="blockedOverlay" class="blocked-overlay">
+  <div class="blocked-box">
+    <div class="blocked-icon">🚫</div>
+    <h2>IP Temporarily Blocked</h2>
+    <p id="blockedMsg">Google Play has rate-limited requests from this IP. Cached data is still available, but new scrapes will fail until the block expires.</p>
+    <div class="countdown" id="blockedCountdown"></div>
+    <button onclick="closeBlockedModal()">Dismiss</button>
+  </div>
+</div>
+
+<main id="content">
+  <!-- cards rendered here -->
+</main>
+
+<footer>
+  Data sourced from Google Play via google-play-scraper &middot; refreshed on each request
+</footer>
+
+<!-- App Detail Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-body" id="modalBody">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+  const $content = document.getElementById("content");
+  const $tabs    = document.getElementById("tabs");
+  const $blockedOverlay = document.getElementById("blockedOverlay");
+  const $blockedMsg     = document.getElementById("blockedMsg");
+  const $blockedCount   = document.getElementById("blockedCountdown");
+  let _blockedTimer     = null;
+
+  // ── IP-blocked modal helpers ──────────────────────────────────
+  function showBlockedModal(message) {
+    $blockedMsg.textContent = message || $blockedMsg.textContent;
+    $blockedOverlay.classList.add("open");
+
+    let secs = 120;
+    clearInterval(_blockedTimer);
+    tick();
+    _blockedTimer = setInterval(tick, 1000);
+    function tick() {
+      const m = Math.floor(secs / 60);
+      const s = String(secs % 60).padStart(2, "0");
+      $blockedCount.textContent = `Suggested wait: ${m}:${s}`;
+      if (secs <= 0) {
+        clearInterval(_blockedTimer);
+        $blockedCount.textContent = "You can try again now.";
+      }
+      secs--;
+    }
+  }
+  function closeBlockedModal() {
+    $blockedOverlay.classList.remove("open");
+    clearInterval(_blockedTimer);
+  }
+
+  /** Wrapper around fetch that auto-detects 429 blocked responses. */
+  async function apiFetch(url, opts) {
+    const res = await fetch(url, opts);
+    if (res.status === 429) {
+      let msg = "";
+      try { const body = await res.clone().json(); msg = body.error || ""; } catch (_) {}
+      showBlockedModal(msg);
+      throw new Error(msg || "IP blocked (429)");
+    }
+    return res;
+  }
+
+  // ── Render helpers ────────────────────────────────────────
+  function showLoading() {
+    $content.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        Fetching data from Google Play… this may take a minute.
+      </div>`;
+  }
+
+  function showError(msg) {
+    $content.innerHTML = `<div class="error">⚠️ ${msg}</div>`;
+  }
+
+  function renderApps(title, apps) {
+    let html = `<h2 class="section-title">${title} (${apps.length} apps)</h2><div class="grid">`;
+    for (const app of apps) {
+      const topClass = app.rank <= 3 ? "top3" : "";
+      const stars = app.score ? "⭐ " + app.score.toFixed(1) : "";
+      html += `
+        <div class="card-link" data-appid="${esc(app.appId)}" style="cursor:pointer">
+          <div class="card">
+            <span class="rank ${topClass}">#${app.rank}</span>
+            <img class="icon" src="${app.icon}" alt="" loading="lazy" />
+            <div class="info">
+              <div class="name" title="${esc(app.title)}">${esc(app.title)}</div>
+              <div class="dev">${esc(app.developer)}</div>
+            </div>
+            <div class="meta">
+              <div class="installs">${app.installs}</div>
+              <div class="rating">${stars}</div>
+              <div class="genre">${esc(app.genre)}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  function renderKeywords(title, keywords) {
+    let html = `<div class="keywords-section">`;
+    html += `<h2 class="section-title">${title} (${keywords.length} keywords)</h2>`;
+    html += `<div class="keywords-grid">`;
+    keywords.forEach((kw, i) => {
+      html += `
+        <div class="kw-pill">
+          <span class="kw-rank">#${i + 1}</span>
+          <span class="kw-name">${esc(kw.keyword)}</span>
+          <span class="kw-count">${kw.resultCount} apps</span>
+        </div>`;
+    });
+    html += `</div></div>`;
+    return html;
+  }
+
+  function esc(str) {
+    const d = document.createElement("div");
+    d.textContent = str || "";
+    return d.innerHTML;
+  }
+
+  // ── Fetch & display ───────────────────────────────────────
+  async function loadEndpoint(endpoint) {
+    if (endpoint === "anime") {
+      return loadAnime();
+    }
+    if (endpoint === "niche-finder") {
+      return loadNicheFinder();
+    }
+    if (endpoint === "analysis") {
+      return loadAnalysis();
+    }
+    showLoading();
+    try {
+      const res = await apiFetch(endpoint);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      // Determine export key
+      let exportKey = "top";
+      const catMatch = endpoint.match(/\/api\/category\/(.+)/);
+      if (catMatch) exportKey = catMatch[1];
+
+      let html = renderToolbar(exportKey);
+      html += renderApps(data.title, data.apps);
+      $content.innerHTML = html;
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  async function loadAnime() {
+    showLoading();
+    try {
+      // Fetch keywords and apps in parallel
+      const [kwRes, appRes] = await Promise.all([
+        apiFetch("/api/anime/keywords"),
+        apiFetch("/api/anime/apps"),
+      ]);
+      if (!kwRes.ok) throw new Error(`Keywords: HTTP ${kwRes.status}`);
+      if (!appRes.ok) throw new Error(`Apps: HTTP ${appRes.status}`);
+      const kwData  = await kwRes.json();
+      const appData = await appRes.json();
+
+      let html = "";
+      html += renderKeywords(kwData.title, kwData.keywords);
+      html += renderApps(appData.title, appData.apps);
+      $content.innerHTML = html;
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // ── Tab behaviour ─────────────────────────────────────────
+  $tabs.addEventListener("click", (e) => {
+    const btn = e.target.closest(".tab-btn");
+    if (!btn) return;
+    $tabs.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    loadEndpoint(btn.dataset.endpoint);
+  });
+
+  // ── Init: load categories, then load "All" ─────────────
+  (async () => {
+    try {
+      const res = await apiFetch("/api/categories");
+      const { categories } = await res.json();
+      for (const cat of categories) {
+        const btn = document.createElement("button");
+        btn.className = "tab-btn";
+        btn.dataset.endpoint = `/api/category/${cat}`;
+        btn.textContent = cat;
+        $tabs.appendChild(btn);
+      }
+    } catch (_) { /* categories are optional */ }
+
+    loadEndpoint("/api/top");
+  })();
+
+  // ── Modal logic ───────────────────────────────────────────
+  const $modal        = document.getElementById("modal");
+  const $modalContent = document.getElementById("modalContent");
+  const $modalClose   = document.getElementById("modalClose");
+
+  // Close modal
+  $modalClose.addEventListener("click", () => $modal.classList.remove("open"));
+  $modal.addEventListener("click", (e) => {
+    if (e.target === $modal) $modal.classList.remove("open");
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") $modal.classList.remove("open");
+  });
+
+  // Open modal on card click
+  $content.addEventListener("click", (e) => {
+    const link = e.target.closest(".card-link[data-appid]");
+    if (!link) return;
+    e.preventDefault();
+    const appId = link.dataset.appid;
+    openAppDetail(appId);
+  });
+
+  async function openAppDetail(appId) {
+    $modalContent.innerHTML = `
+      <div class="loading" style="padding:40px 0">
+        <div class="spinner"></div>
+        Loading app details…
+      </div>`;
+    $modal.classList.add("open");
+
+    try {
+      const res = await apiFetch(`/api/app/${encodeURIComponent(appId)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const app = await res.json();
+      if (app.error) throw new Error(app.error);
+      $modalContent.innerHTML = renderDetail(app);
+    } catch (err) {
+      $modalContent.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
+    }
+  }
+
+  function formatNumber(n) {
+    if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + "B";
+    if (n >= 1_000_000)     return (n / 1_000_000).toFixed(1) + "M";
+    if (n >= 1_000)         return (n / 1_000).toFixed(1) + "K";
+    return String(n);
+  }
+
+  function renderDetail(app) {
+    const stars = app.score ? "⭐ " + app.score.toFixed(1) : "N/A";
+    const priceText = app.free ? "Free" : `$${app.price}`;
+
+    // Screenshots
+    let screenshotHtml = "";
+    if (app.screenshots && app.screenshots.length) {
+      screenshotHtml = `<div class="detail-screenshots">`;
+      for (const src of app.screenshots) {
+        screenshotHtml += `<img src="${src}" alt="screenshot" loading="lazy" />`;
+      }
+      screenshotHtml += `</div>`;
+    }
+
+    return `
+      <div class="detail-header">
+        <img src="${app.icon}" alt="" />
+        <div>
+          <div class="detail-title">${esc(app.title)}</div>
+          <div class="detail-dev">${esc(app.developer)}</div>
+          <span class="detail-genre-badge">${esc(app.genre)} · ${esc(app.contentRating || "N/A")}</span>
+        </div>
+      </div>
+
+      <div class="detail-stats">
+        <div class="stat-card">
+          <div class="stat-value">${app.installs}</div>
+          <div class="stat-label">Downloads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${formatNumber(app.realInstalls)}</div>
+          <div class="stat-label">Actual Installs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stars}</div>
+          <div class="stat-label">Rating</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${formatNumber(app.ratings || 0)}</div>
+          <div class="stat-label">Ratings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${formatNumber(app.reviews || 0)}</div>
+          <div class="stat-label">Reviews</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${priceText}</div>
+          <div class="stat-label">Price</div>
+        </div>
+      </div>
+
+      <h3 class="section-title" style="font-size:1rem;margin-bottom:8px">Description</h3>
+      <div class="detail-description">${esc(app.description)}</div>
+
+      ${screenshotHtml}
+
+      <div class="detail-footer">
+        <a href="${app.url}" target="_blank" rel="noopener">View on Google Play ↗</a>
+        <div class="detail-meta-info">
+          ${app.released ? "Published: " + esc(app.released) + "<br>" : ""}
+          ${app.lastUpdatedOn ? "Updated: " + esc(app.lastUpdatedOn) + "<br>" : ""}
+          ${app.version ? "Version: " + esc(app.version) : ""}
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Toolbar (export + snapshot) ────────────────────────────
+  function renderToolbar(exportKey) {
+    return `
+      <div class="toolbar">
+        <button class="toolbar-btn" onclick="exportCSV('${exportKey}')">📥 Export CSV</button>
+        <button class="toolbar-btn" onclick="takeSnapshot()">📸 Save Snapshot</button>
+        <button class="toolbar-btn" onclick="showDiff('general_top')">📊 Compare Snapshots</button>
+      </div>`;
+  }
+
+  function exportCSV(key) {
+    window.open(`/api/export/${encodeURIComponent(key)}`, "_blank");
+  }
+
+  async function takeSnapshot() {
+    try {
+      const res = await apiFetch("/api/snapshot/save", { method: "POST" });
+      const data = await res.json();
+      alert(`Snapshot saved! Keys: ${data.keys.join(", ")}`);
+    } catch (err) {
+      alert("Failed to save snapshot: " + err.message);
+    }
+  }
+
+  async function showDiff(snapKey) {
+    $modalContent.innerHTML = `
+      <div class="loading" style="padding:40px 0">
+        <div class="spinner"></div>
+        Comparing snapshots…
+      </div>`;
+    $modal.classList.add("open");
+
+    try {
+      const res = await apiFetch(`/api/snapshot/${encodeURIComponent(snapKey)}/diff`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      $modalContent.innerHTML = renderDiff(data);
+    } catch (err) {
+      $modalContent.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
+    }
+  }
+
+  function renderDiff(diff) {
+    let html = `<h2 class="section-title" style="margin-bottom:6px">${esc(diff.key)} – Snapshot Diff</h2>`;
+    html += `<p style="font-size:.75rem;color:#6b7280;margin-bottom:16px">${diff.previousDate} → ${diff.currentDate}</p>`;
+
+    // New apps
+    html += `<div class="diff-section"><h3>🆕 New Apps (${diff.newApps.length})</h3>`;
+    if (diff.newApps.length === 0) html += `<p style="font-size:.82rem;color:#6b7280">None</p>`;
+    for (const a of diff.newApps) {
+      html += `<div class="diff-item">${esc(a.title)} — ${formatNumber(a.realInstalls || 0)} installs</div>`;
+    }
+    html += `</div>`;
+
+    // Dropped apps
+    html += `<div class="diff-section"><h3>❌ Dropped Apps (${diff.droppedApps.length})</h3>`;
+    if (diff.droppedApps.length === 0) html += `<p style="font-size:.82rem;color:#6b7280">None</p>`;
+    for (const a of diff.droppedApps) {
+      html += `<div class="diff-item">${esc(a.title)} — ${formatNumber(a.realInstalls || 0)} installs</div>`;
+    }
+    html += `</div>`;
+
+    // Install changes
+    html += `<div class="diff-section"><h3>📈 Install Changes (top ${diff.installChanges.length})</h3>`;
+    for (const c of diff.installChanges) {
+      const cls = c.change >= 0 ? "change-positive" : "change-negative";
+      const sign = c.change >= 0 ? "+" : "";
+      html += `<div class="diff-item">
+        ${esc(c.title)}
+        <span class="${cls}">${sign}${formatNumber(c.change)}</span>
+        (${formatNumber(c.previousInstalls)} → ${formatNumber(c.currentInstalls)})
+      </div>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  // ── Niche Finder ──────────────────────────────────────────
+  async function loadNicheFinder() {
+    showLoading();
+    try {
+      const res = await apiFetch("/api/niche/scores");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      $content.innerHTML = renderNicheScores(data.title, data.scores);
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  function renderNicheScores(title, scores) {
+    let html = `<h2 class="section-title">${title}</h2>`;
+    html += `<div class="niche-grid">`;
+    for (const s of scores) {
+      const oppClass = s.opportunityScore >= 55 ? "opp-high" : s.opportunityScore >= 35 ? "opp-medium" : "opp-low";
+      const barColor = s.opportunityScore >= 55 ? "#34d399" : s.opportunityScore >= 35 ? "#fbbf24" : "#f87171";
+      html += `
+        <div class="niche-card" onclick="openNicheDetail('${esc(s.niche)}')">
+          <div class="niche-name">${esc(s.niche)}</div>
+          <span class="opportunity-badge ${oppClass}">${s.opportunityScore}/100</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:${s.opportunityScore}%;background:${barColor}"></div></div>
+          <div class="niche-metrics">
+            <div class="niche-metric">Keywords: <strong>${s.keywordCount}</strong></div>
+            <div class="niche-metric">Avg Results: <strong>${s.avgResultsPerKeyword}</strong></div>
+            <div class="niche-metric">Saturation: <strong>${s.saturationPct}%</strong></div>
+            <div class="niche-metric">Gap (< 4★): <strong>${s.gapPct}%</strong></div>
+            <div class="niche-metric">Fresh Apps: <strong>${s.freshnessPct}%</strong></div>
+            <div class="niche-metric">Avg Installs: <strong>${formatNumber(s.avgInstalls)}</strong></div>
+          </div>
+        </div>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  async function openNicheDetail(niche) {
+    $modalContent.innerHTML = `
+      <div class="loading" style="padding:40px 0">
+        <div class="spinner"></div>
+        Loading ${esc(niche)} keywords…
+      </div>`;
+    $modal.classList.add("open");
+
+    try {
+      const res = await apiFetch(`/api/niche/${encodeURIComponent(niche)}/keywords`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      $modalContent.innerHTML = renderKeywords(data.title, data.keywords);
+    } catch (err) {
+      $modalContent.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ── Analysis & Comparison ─────────────────────────────────
+  let _cachedAllApps = [];  // cache for dropdown population
+
+  async function loadAnalysis() {
+    showLoading();
+    // Load the general top apps for the dropdowns (from DB if cached)
+    try {
+      const res = await apiFetch("/api/top");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      _cachedAllApps = data.apps || [];
+    } catch (_) {
+      _cachedAllApps = [];
+    }
+
+    let optionsHtml = '<option value="">Select an app…</option>';
+    for (const a of _cachedAllApps) {
+      optionsHtml += `<option value="${esc(a.appId)}">${esc(a.title)}</option>`;
+    }
+
+    $content.innerHTML = `
+      <h2 class="section-title">📊 App Analysis & Comparison</h2>
+      <div class="analysis-panel">
+        <p style="font-size:.85rem;color:#9ca3af;margin-bottom:16px">
+          Select two apps to compare their descriptions (word overlap) and view install growth from snapshots.
+          You can also paste a package ID directly.
+        </p>
+        <div class="compare-form">
+          <label>App 1
+            <select id="cmpSel1" onchange="document.getElementById('cmpId1').value=this.value">
+              ${optionsHtml}
+            </select>
+          </label>
+          <label>or Package ID
+            <input id="cmpId1" placeholder="com.example.app1" />
+          </label>
+          <label>App 2
+            <select id="cmpSel2" onchange="document.getElementById('cmpId2').value=this.value">
+              ${optionsHtml}
+            </select>
+          </label>
+          <label>or Package ID
+            <input id="cmpId2" placeholder="com.example.app2" />
+          </label>
+          <button class="compare-btn" onclick="runComparison()">Compare</button>
+        </div>
+        <div id="compareResults"></div>
+      </div>
+    `;
+  }
+
+  let _chartInstance = null;
+
+  async function runComparison() {
+    const id1 = document.getElementById("cmpId1").value.trim();
+    const id2 = document.getElementById("cmpId2").value.trim();
+    const $results = document.getElementById("compareResults");
+    if (!id1 || !id2) {
+      $results.innerHTML = '<div class="error">Please select or enter both apps.</div>';
+      return;
+    }
+    $results.innerHTML = `
+      <div class="loading" style="padding:30px 0">
+        <div class="spinner"></div>Comparing apps…
+      </div>`;
+
+    try {
+      // Fetch comparison + install histories in parallel
+      const [cmpRes, hist1Res, hist2Res] = await Promise.all([
+        apiFetch(`/api/compare?app1=${encodeURIComponent(id1)}&app2=${encodeURIComponent(id2)}`),
+        apiFetch(`/api/install-history/${encodeURIComponent(id1)}`),
+        apiFetch(`/api/install-history/${encodeURIComponent(id2)}`),
+      ]);
+
+      if (!cmpRes.ok) { const e = await cmpRes.json(); throw new Error(e.error || `HTTP ${cmpRes.status}`); }
+      const cmp = await cmpRes.json();
+      const hist1 = hist1Res.ok ? await hist1Res.json() : { history: [] };
+      const hist2 = hist2Res.ok ? await hist2Res.json() : { history: [] };
+
+      $results.innerHTML = renderComparison(cmp, hist1, hist2);
+
+      // Render chart
+      renderInstallChart(cmp, hist1, hist2);
+    } catch (err) {
+      $results.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
+    }
+  }
+
+  function renderComparison(cmp, hist1, hist2) {
+    const a1 = cmp.app1;
+    const a2 = cmp.app2;
+
+    let html = '';
+
+    // Side-by-side app cards
+    html += `<div class="compare-result">`;
+    html += renderCompareCard(a1, "#7c3aed");
+    html += renderCompareCard(a2, "#34d399");
+    html += `</div>`;
+
+    // Overlap
+    html += `<span class="overlap-badge">Description Overlap: ${cmp.overlapPct}%</span>`;
+
+    // Shared words
+    html += `<div class="word-section"><h3>🔗 Shared Keywords (${cmp.sharedWords.length})</h3><div class="word-chips">`;
+    for (const w of cmp.sharedWords) {
+      html += `<span class="word-chip shared">${esc(w.word)} (${w.countApp1}/${w.countApp2})</span>`;
+    }
+    html += `</div></div>`;
+
+    // Only App 1
+    html += `<div class="word-section"><h3>🟣 Only in ${esc(a1.title)} (${cmp.onlyApp1.length})</h3><div class="word-chips">`;
+    for (const w of cmp.onlyApp1) {
+      html += `<span class="word-chip only1">${esc(w.word)} (${w.count})</span>`;
+    }
+    html += `</div></div>`;
+
+    // Only App 2
+    html += `<div class="word-section"><h3>🟢 Only in ${esc(a2.title)} (${cmp.onlyApp2.length})</h3><div class="word-chips">`;
+    for (const w of cmp.onlyApp2) {
+      html += `<span class="word-chip only2">${esc(w.word)} (${w.count})</span>`;
+    }
+    html += `</div></div>`;
+
+    // Chart placeholder
+    html += `
+      <div class="chart-container">
+        <h3 class="section-title" style="font-size:1rem;margin-bottom:10px">📈 Install Growth (from snapshots)</h3>
+        <canvas id="installChart"></canvas>
+        ${(hist1.history.length === 0 && hist2.history.length === 0)
+          ? '<p style="font-size:.82rem;color:#6b7280;margin-top:8px">No snapshot history yet. Save snapshots over time to see growth.</p>'
+          : ''}
+      </div>`;
+
+    return html;
+  }
+
+  function renderCompareCard(app, borderColor) {
+    const stars = app.score ? "⭐ " + app.score.toFixed(1) : "N/A";
+    return `
+      <div class="compare-app-card" style="border-top:3px solid ${borderColor}">
+        <div class="app-hdr">
+          <img src="${app.icon}" alt="" />
+          <div>
+            <div class="app-title">${esc(app.title)}</div>
+            <div class="app-dev">${esc(app.developer)}</div>
+          </div>
+        </div>
+        <div class="niche-metrics">
+          <div class="niche-metric">Installs: <strong>${app.installs}</strong></div>
+          <div class="niche-metric">Rating: <strong>${stars}</strong></div>
+          <div class="niche-metric">Ratings: <strong>${formatNumber(app.ratings || 0)}</strong></div>
+          <div class="niche-metric">Genre: <strong>${esc(app.genre)}</strong></div>
+          <div class="niche-metric">Released: <strong>${esc(app.released || "N/A")}</strong></div>
+          <div class="niche-metric">Words: <strong>${app.totalWords} (${app.uniqueWords} unique)</strong></div>
+        </div>
+      </div>`;
+  }
+
+  function renderInstallChart(cmp, hist1, hist2) {
+    const canvas = document.getElementById("installChart");
+    if (!canvas) return;
+
+    // Destroy previous chart
+    if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
+
+    // Merge dates
+    const allDates = new Set();
+    for (const h of hist1.history) allDates.add(h.date.slice(0, 10));
+    for (const h of hist2.history) allDates.add(h.date.slice(0, 10));
+
+    if (allDates.size === 0) {
+      // No snapshot data — show current installs as a single bar
+      _chartInstance = new Chart(canvas.getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: [cmp.app1.title, cmp.app2.title],
+          datasets: [{
+            label: "Current Installs",
+            data: [cmp.app1.realInstalls, cmp.app2.realInstalls],
+            backgroundColor: ["#7c3aed", "#34d399"],
+            borderRadius: 6,
+          }],
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { ticks: { color: "#9ca3af" }, grid: { color: "#272a3a" } },
+            x: { ticks: { color: "#9ca3af" }, grid: { display: false } },
+          },
+        },
+      });
+      return;
+    }
+
+    const labels = [...allDates].sort();
+    const map1 = {};
+    const map2 = {};
+    for (const h of hist1.history) map1[h.date.slice(0, 10)] = h.realInstalls;
+    for (const h of hist2.history) map2[h.date.slice(0, 10)] = h.realInstalls;
+
+    _chartInstance = new Chart(canvas.getContext("2d"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: cmp.app1.title,
+            data: labels.map(d => map1[d] ?? null),
+            borderColor: "#7c3aed",
+            backgroundColor: "rgba(124,58,237,.15)",
+            fill: true, tension: .3, spanGaps: true,
+          },
+          {
+            label: cmp.app2.title,
+            data: labels.map(d => map2[d] ?? null),
+            borderColor: "#34d399",
+            backgroundColor: "rgba(52,211,153,.15)",
+            fill: true, tension: .3, spanGaps: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: { labels: { color: "#e0e0e0" } },
+        },
+        scales: {
+          y: { ticks: { color: "#9ca3af" }, grid: { color: "#272a3a" } },
+          x: { ticks: { color: "#9ca3af" }, grid: { color: "#272a3a" } },
+        },
+      },
+    });
+  }
+</script>
+
+</body>
+</html>
