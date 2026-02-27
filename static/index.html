@@ -525,6 +525,216 @@
     }
     .blocked-box button:hover { background: #4b5563; }
 
+    /* ── Throttle / Cooldown Toast ─────────────────────────── */
+    .throttle-overlay {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(120%);
+      transition: transform .35s ease, opacity .25s ease;
+    }
+    .throttle-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+    }
+    .throttle-box {
+      background: #1c1e30;
+      border: 2px solid #f59e0b;
+      border-radius: 14px;
+      padding: 20px 24px;
+      min-width: 280px;
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .throttle-box .throttle-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .throttle-box .throttle-icon { font-size: 1.6rem; }
+    .throttle-box .throttle-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f59e0b;
+    }
+    .throttle-box p {
+      color: #d1d5db;
+      font-size: .82rem;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+    .throttle-timer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .throttle-timer .timer-ring {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+    .throttle-timer .timer-ring circle {
+      fill: none;
+      stroke-width: 4;
+    }
+    .throttle-timer .timer-ring .ring-bg {
+      stroke: #374151;
+    }
+    .throttle-timer .timer-ring .ring-fg {
+      stroke: #f59e0b;
+      stroke-linecap: round;
+      transition: stroke-dashoffset .95s linear;
+    }
+    .throttle-timer .timer-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fbbf24;
+      font-variant-numeric: tabular-nums;
+    }
+    .throttle-timer .timer-label {
+      font-size: .75rem;
+      color: #9ca3af;
+    }
+    .throttle-bar {
+      height: 4px;
+      background: #374151;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .throttle-bar .throttle-fill {
+      height: 100%;
+      background: #f59e0b;
+      border-radius: 4px;
+      transition: width .95s linear;
+    }
+    .throttle-box .dismiss-link {
+      display: block;
+      text-align: right;
+      font-size: .75rem;
+      color: #6b7280;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .throttle-box .dismiss-link:hover { color: #9ca3af; }
+
+    /* ── ETA timer ────────────────────────────────────────── */
+    .eta-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .eta-bar-outer {
+      width: 220px;
+      height: 6px;
+      background: #1e1e2e;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .eta-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      border-radius: 6px;
+      transition: width 1s linear;
+    }
+    .eta-text {
+      font-size: .85rem;
+      color: #9ca3af;
+      font-variant-numeric: tabular-nums;
+    }
+    .eta-text span {
+      color: #c4b5fd;
+      font-weight: 600;
+    }
+
+    /* ── Welcome / Landing Page ──────────────────────────── */
+    .welcome {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .welcome h2 {
+      font-size: 1.6rem;
+      color: #c4b5fd;
+      margin-bottom: 8px;
+    }
+    .welcome .subtitle {
+      color: #9ca3af;
+      font-size: .92rem;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .welcome-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 14px;
+      text-align: left;
+    }
+    .welcome-card {
+      background: #1a1c2e;
+      border: 1px solid #272a3a;
+      border-radius: 12px;
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .welcome-card:hover {
+      border-color: #7c3aed;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(124,58,237,.15);
+    }
+    .welcome-card .wc-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .welcome-card .wc-name .wc-icon {
+      font-size: 1.25rem;
+    }
+    .welcome-card .wc-cache {
+      font-size: .72rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .welcome-card .wc-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .wc-dot.fresh   { background: #34d399; }
+    .wc-dot.stale   { background: #f59e0b; }
+    .wc-dot.none    { background: #4b5563; }
+    .wc-cache-text  { color: #6b7280; }
+    .wc-cache-text.fresh { color: #34d399; }
+    .wc-cache-text.stale { color: #f59e0b; }
+    .wc-fresh-msg {
+      background: #0d2818;
+      border: 1px solid #166534;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-bottom: 18px;
+      font-size: .82rem;
+      color: #34d399;
+      line-height: 1.4;
+    }
+    .wc-fresh-msg strong { color: #6ee7b7; }
+
     /* ── Analysis / Compare ──────────────────────────────── */
     .analysis-panel {
       margin-bottom: 24px;
@@ -651,6 +861,182 @@
       color: #a78bfa;
       margin-bottom: 14px;
     }
+
+    /* ── Request Log Sidebar ──────────────────────────────── */
+    .sidebar-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 10001;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid #374151;
+      background: #1a1c2e;
+      color: #a78bfa;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .25s;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    }
+    .sidebar-toggle:hover {
+      border-color: #7c3aed;
+      background: #272a3a;
+      transform: scale(1.08);
+    }
+    .sidebar-toggle .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #7c3aed;
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .sidebar-toggle .badge.has-error {
+      background: #ef4444;
+    }
+    .req-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 370px;
+      height: 100vh;
+      z-index: 10000;
+      background: #13151f;
+      border-left: 2px solid #272a3a;
+      transform: translateX(100%);
+      transition: transform .3s ease;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0,0,0,.4);
+    }
+    .req-sidebar.open {
+      transform: translateX(0);
+    }
+    .req-sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid #272a3a;
+      flex-shrink: 0;
+    }
+    .req-sidebar-header h3 {
+      font-size: 1rem;
+      color: #c4b5fd;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .req-sidebar-header .clear-btn {
+      background: none;
+      border: 1px solid #374151;
+      color: #9ca3af;
+      font-size: .72rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .req-sidebar-header .clear-btn:hover {
+      border-color: #ef4444;
+      color: #f87171;
+    }
+    .req-sidebar-header .close-sb {
+      background: none;
+      border: none;
+      color: #6b7280;
+      font-size: 1.3rem;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .req-sidebar-header .close-sb:hover { color: #e0e0e0; }
+    .req-sidebar-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+    .req-sidebar-list::-webkit-scrollbar { width: 5px; }
+    .req-sidebar-list::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    .req-sidebar-empty {
+      text-align: center;
+      color: #4b5563;
+      padding: 50px 20px;
+      font-size: .85rem;
+    }
+    .req-entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 18px;
+      border-bottom: 1px solid #1e1e2e;
+      transition: background .15s;
+      cursor: default;
+    }
+    .req-entry:hover {
+      background: #1a1c2e;
+    }
+    .req-entry .req-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .req-entry .req-dot.ok      { background: #34d399; }
+    .req-entry .req-dot.fail    { background: #ef4444; }
+    .req-entry .req-dot.pending { background: #f59e0b; animation: pulse-dot 1s ease infinite; }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: .35; }
+    }
+    .req-entry .req-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .req-entry .req-url {
+      font-size: .78rem;
+      color: #d1d5db;
+      font-family: 'Courier New', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .req-entry .req-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 3px;
+      font-size: .7rem;
+      color: #6b7280;
+    }
+    .req-entry .req-meta .status-ok   { color: #34d399; font-weight: 600; }
+    .req-entry .req-meta .status-fail { color: #ef4444; font-weight: 600; }
+    .req-entry .req-reason {
+      margin-top: 4px;
+      font-size: .7rem;
+      color: #f87171;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .req-entry .req-time {
+      font-size: .65rem;
+      color: #4b5563;
+      white-space: nowrap;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -661,7 +1047,8 @@
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab-btn active" data-endpoint="/api/top">All</button>
+  <button class="tab-btn active" data-endpoint="welcome">🏠 Home</button>
+  <button class="tab-btn" data-endpoint="/api/top">All</button>
   <button class="tab-btn" data-endpoint="anime">🎌 Anime</button>
   <button class="tab-btn" data-endpoint="niche-finder">🔍 Niche Finder</button>
   <button class="tab-btn" data-endpoint="analysis">📊 Analysis</button>
@@ -678,6 +1065,47 @@
     <button onclick="closeBlockedModal()">Dismiss</button>
   </div>
 </div>
+
+<!-- Throttle cooldown toast -->
+<div id="throttleOverlay" class="throttle-overlay">
+  <div class="throttle-box">
+    <div class="throttle-header">
+      <span class="throttle-icon">⏳</span>
+      <span class="throttle-title" id="throttleTitle">Cooldown Active</span>
+    </div>
+    <p id="throttleMsg">Waiting between requests to avoid getting blocked by Google Play.</p>
+    <div class="throttle-timer">
+      <svg class="timer-ring" viewBox="0 0 44 44">
+        <circle class="ring-bg" cx="22" cy="22" r="18" />
+        <circle class="ring-fg" id="throttleRing" cx="22" cy="22" r="18"
+                stroke-dasharray="113.1" stroke-dashoffset="0" />
+      </svg>
+      <div>
+        <div class="timer-text" id="throttleCountdown">10s</div>
+        <div class="timer-label">remaining</div>
+      </div>
+    </div>
+    <div class="throttle-bar"><div class="throttle-fill" id="throttleFill" style="width:100%"></div></div>
+    <span class="dismiss-link" onclick="closeThrottleModal()">dismiss</span>
+  </div>
+</div>
+
+<!-- Request Log Sidebar -->
+<button class="sidebar-toggle" id="sidebarToggle" title="Request Log">
+  📋<span class="badge" id="sidebarBadge" style="display:none">0</span>
+</button>
+<aside class="req-sidebar" id="reqSidebar">
+  <div class="req-sidebar-header">
+    <h3>📋 Request Log</h3>
+    <div>
+      <button class="clear-btn" id="clearLogBtn">Clear</button>
+      <button class="close-sb" id="closeSidebar">&times;</button>
+    </div>
+  </div>
+  <div class="req-sidebar-list" id="reqList">
+    <div class="req-sidebar-empty">No requests yet</div>
+  </div>
+</aside>
 
 <main id="content">
   <!-- cards rendered here -->
@@ -728,29 +1156,320 @@
     clearInterval(_blockedTimer);
   }
 
-  /** Wrapper around fetch that auto-detects 429 blocked responses. */
-  async function apiFetch(url, opts) {
-    const res = await fetch(url, opts);
-    if (res.status === 429) {
-      let msg = "";
-      try { const body = await res.clone().json(); msg = body.error || ""; } catch (_) {}
-      showBlockedModal(msg);
-      throw new Error(msg || "IP blocked (429)");
+  // ── Request Log sidebar ────────────────────────────────────
+  const $reqSidebar  = document.getElementById("reqSidebar");
+  const $reqList     = document.getElementById("reqList");
+  const $sidebarBadge = document.getElementById("sidebarBadge");
+  const _requestLog  = [];    // {id, url, status, statusText, duration, error, time}
+  let _reqIdCounter  = 0;
+
+  document.getElementById("sidebarToggle").addEventListener("click", () => {
+    $reqSidebar.classList.toggle("open");
+  });
+  document.getElementById("closeSidebar").addEventListener("click", () => {
+    $reqSidebar.classList.remove("open");
+  });
+  document.getElementById("clearLogBtn").addEventListener("click", () => {
+    _requestLog.length = 0;
+    _renderReqLog();
+  });
+
+  function _addReqEntry(entry) {
+    _requestLog.unshift(entry);  // newest first
+    if (_requestLog.length > 200) _requestLog.pop();
+    _renderReqLog();
+  }
+
+  function _updateReqEntry(id, updates) {
+    const e = _requestLog.find(r => r.id === id);
+    if (e) Object.assign(e, updates);
+    _renderReqLog();
+  }
+
+  function _renderReqLog() {
+    const errorCount = _requestLog.filter(r => r.status === 'error').length;
+    const total = _requestLog.length;
+
+    // Badge
+    if (total > 0) {
+      $sidebarBadge.style.display = '';
+      $sidebarBadge.textContent = total > 99 ? '99+' : total;
+      $sidebarBadge.classList.toggle('has-error', errorCount > 0);
+    } else {
+      $sidebarBadge.style.display = 'none';
     }
-    return res;
+
+    if (total === 0) {
+      $reqList.innerHTML = '<div class="req-sidebar-empty">No requests yet</div>';
+      return;
+    }
+
+    let html = '';
+    for (const r of _requestLog) {
+      const dotClass = r.status === 'pending' ? 'pending'
+                     : r.status === 'error'   ? 'fail'
+                     : 'ok';
+      const statusLabel = r.status === 'pending'
+        ? '<span style="color:#f59e0b">pending…</span>'
+        : r.status === 'error'
+          ? `<span class="status-fail">${_escLog(r.statusCode || 'ERR')}</span>`
+          : `<span class="status-ok">${r.statusCode || '200'}</span>`;
+      const durLabel = r.duration != null ? (r.duration < 1000 ? r.duration + 'ms' : (r.duration / 1000).toFixed(1) + 's') : '';
+      const shortUrl = r.url.replace(/^\/api\//, '');
+      html += `
+        <div class="req-entry">
+          <div class="req-dot ${dotClass}"></div>
+          <div class="req-body">
+            <div class="req-url" title="${_escLog(r.url)}">${_escLog(shortUrl)}</div>
+            <div class="req-meta">
+              ${statusLabel}
+              ${durLabel ? '<span>· ' + durLabel + '</span>' : ''}
+            </div>
+            ${r.error ? '<div class="req-reason">⚠ ' + _escLog(r.error) + '</div>' : ''}
+          </div>
+          <div class="req-time">${r.timeStr}</div>
+        </div>`;
+    }
+    $reqList.innerHTML = html;
+  }
+
+  function _escLog(s) {
+    const d = document.createElement('div');
+    d.textContent = String(s || '');
+    return d.innerHTML;
+  }
+
+  function _nowTimeStr() {
+    const d = new Date();
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+
+  /** Wrapper around fetch that auto-detects 429 blocked responses
+   *  and logs every request to the sidebar. */
+  async function apiFetch(url, opts) {
+    const reqId = ++_reqIdCounter;
+    const t0 = performance.now();
+    _addReqEntry({
+      id: reqId,
+      url: url,
+      status: 'pending',
+      statusCode: null,
+      duration: null,
+      error: null,
+      timeStr: _nowTimeStr(),
+    });
+
+    try {
+      const res = await fetch(url, opts);
+      const dur = Math.round(performance.now() - t0);
+
+      if (res.status === 429) {
+        let msg = '';
+        try { const body = await res.clone().json(); msg = body.error || ''; } catch (_) {}
+        _updateReqEntry(reqId, { status: 'error', statusCode: '429', duration: dur, error: msg || 'IP blocked (429)' });
+        showBlockedModal(msg);
+        throw new Error(msg || 'IP blocked (429)');
+      }
+
+      if (!res.ok) {
+        _updateReqEntry(reqId, { status: 'error', statusCode: String(res.status), duration: dur, error: res.statusText });
+      } else {
+        _updateReqEntry(reqId, { status: 'ok', statusCode: String(res.status), duration: dur });
+      }
+      return res;
+    } catch (err) {
+      const dur = Math.round(performance.now() - t0);
+      if (err.name === 'AbortError') {
+        _updateReqEntry(reqId, { status: 'error', statusCode: 'ABORT', duration: dur, error: 'Request cancelled (tab switch)' });
+      } else {
+        // Only update if not already set (e.g. by 429 handler above)
+        const existing = _requestLog.find(r => r.id === reqId);
+        if (existing && existing.status === 'pending') {
+          _updateReqEntry(reqId, { status: 'error', statusCode: 'ERR', duration: dur, error: err.message });
+        }
+      }
+      throw err;
+    }
+  }
+
+  // ── Throttle / Cooldown toast ──────────────────────────────────
+  const $throttleOverlay = document.getElementById("throttleOverlay");
+  const $throttleTitle   = document.getElementById("throttleTitle");
+  const $throttleMsg     = document.getElementById("throttleMsg");
+  const $throttleCount   = document.getElementById("throttleCountdown");
+  const $throttleRing    = document.getElementById("throttleRing");
+  const $throttleFill    = document.getElementById("throttleFill");
+  let _throttleTimer     = null;
+  let _lastTabClick      = 0;        // timestamp of last tab switch
+  const TAB_COOLDOWN     = 10;       // seconds between tab switches
+  const RING_CIRCUM      = 113.1;    // 2πr for r=18
+
+  function showThrottleModal(totalSecs, title, msg) {
+    $throttleTitle.textContent = title || "Cooldown Active";
+    $throttleMsg.textContent   = msg   || "Waiting between requests to avoid getting blocked by Google Play.";
+    $throttleOverlay.classList.add("open");
+
+    let remaining = totalSecs;
+    clearInterval(_throttleTimer);
+    updateRing(remaining, totalSecs);
+    _throttleTimer = setInterval(() => {
+      remaining--;
+      updateRing(remaining, totalSecs);
+      if (remaining <= 0) {
+        clearInterval(_throttleTimer);
+        setTimeout(() => $throttleOverlay.classList.remove("open"), 600);
+      }
+    }, 1000);
+  }
+
+  function updateRing(remaining, total) {
+    const pct = Math.max(0, remaining / total);
+    $throttleCount.textContent = remaining + "s";
+    $throttleRing.style.strokeDashoffset = RING_CIRCUM * (1 - pct);
+    $throttleFill.style.width = (pct * 100) + "%";
+  }
+
+  function closeThrottleModal() {
+    $throttleOverlay.classList.remove("open");
+    clearInterval(_throttleTimer);
+  }
+
+  /**
+   * Check if user is switching tabs too fast.
+   * Returns true if the request should proceed, false if throttled.
+   */
+  function checkTabCooldown() {
+    const now = Date.now() / 1000;
+    const elapsed = now - _lastTabClick;
+    if (_lastTabClick > 0 && elapsed < TAB_COOLDOWN) {
+      const wait = Math.ceil(TAB_COOLDOWN - elapsed);
+      showThrottleModal(wait,
+        "Slow Down — Cooldown",
+        "Switching tabs too fast can trigger rate limits. Please wait."
+      );
+      return false;
+    }
+    _lastTabClick = now;
+    return true;
+  }
+
+  /**
+   * Poll the backend throttle status and show/update the toast
+   * while a scrape request is in flight.
+   */
+  async function pollThrottleWhileLoading(signal) {
+    try {
+      const res = await fetch("/api/throttle-status", { signal });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.waiting && data.waitSeconds > 0) {
+        showThrottleModal(
+          Math.ceil(data.waitSeconds),
+          "Database Delay Active",
+          "The scraper is waiting to respect rate limits. Data will load automatically."
+        );
+      }
+    } catch (_) { /* ignore */ }
   }
 
   // ── Render helpers ────────────────────────────────────────
-  function showLoading() {
+  let _etaTimer = null;
+
+  function _startEtaCountdown(totalSecs) {
+    clearInterval(_etaTimer);
+    let elapsed = 0;
+    const $bar   = document.getElementById("etaBar");
+    const $count = document.getElementById("etaCount");
+    if (!$bar || !$count) return;
+    _etaTimer = setInterval(() => {
+      elapsed++;
+      const pct = Math.min(100, (elapsed / totalSecs) * 100);
+      $bar.style.width = pct + "%";
+      const remaining = Math.max(0, Math.ceil(totalSecs - elapsed));
+      if (remaining > 0) {
+        $count.textContent = _fmtEta(remaining);
+      } else {
+        $count.textContent = "almost done…";
+      }
+    }, 1000);
+  }
+
+  function _fmtEta(secs) {
+    if (secs < 60) return secs + "s";
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return m + "m " + (s < 10 ? "0" : "") + s + "s";
+  }
+
+  function _stopEtaCountdown() {
+    clearInterval(_etaTimer);
+    _etaTimer = null;
+  }
+
+  function showLoading(etaSeconds) {
+    let etaHtml = '';
+    if (etaSeconds && etaSeconds > 0) {
+      const fmtEta = etaSeconds < 60
+        ? Math.ceil(etaSeconds) + "s"
+        : Math.floor(etaSeconds / 60) + "m " + (Math.ceil(etaSeconds % 60) < 10 ? "0" : "") + Math.ceil(etaSeconds % 60) + "s";
+      etaHtml = `
+        <div class="eta-wrap">
+          <div class="eta-bar-outer"><div class="eta-bar-inner" id="etaBar"></div></div>
+          <div class="eta-text">
+            Estimated time: <span id="etaCount">${fmtEta}</span>
+          </div>
+        </div>`;
+    }
     $content.innerHTML = `
       <div class="loading">
         <div class="spinner"></div>
         Fetching data from Google Play… this may take a minute.
+        ${etaHtml}
       </div>`;
+
+    if (etaSeconds && etaSeconds > 0) {
+      _startEtaCountdown(etaSeconds);
+    }
   }
 
   function showError(msg) {
     $content.innerHTML = `<div class="error">⚠️ ${msg}</div>`;
+  }
+
+  /**
+   * Staggered image loader — loads images in small batches with delays
+   * to prevent Google’s image CDN from returning 429.
+   */
+  let _imgLoadAbort = null;
+  function loadImagesStaggered(container) {
+    // Cancel any previous staggered load
+    if (_imgLoadAbort) _imgLoadAbort.abort = true;
+    const ctrl = { abort: false };
+    _imgLoadAbort = ctrl;
+
+    const imgs = (container || document).querySelectorAll("img[data-src]");
+    if (!imgs.length) return;
+
+    const BATCH = 6;       // images per batch
+    const DELAY = 300;     // ms between batches
+    let i = 0;
+
+    function loadBatch() {
+      if (ctrl.abort) return;
+      const end = Math.min(i + BATCH, imgs.length);
+      for (; i < end; i++) {
+        const img = imgs[i];
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute("data-src");
+        }
+      }
+      if (i < imgs.length) {
+        setTimeout(loadBatch, DELAY);
+      }
+    }
+    // Start first batch after a very short tick
+    setTimeout(loadBatch, 50);
   }
 
   function renderApps(title, apps) {
@@ -762,7 +1481,7 @@
         <div class="card-link" data-appid="${esc(app.appId)}" style="cursor:pointer">
           <div class="card">
             <span class="rank ${topClass}">#${app.rank}</span>
-            <img class="icon" src="${app.icon}" alt="" loading="lazy" />
+            <img class="icon" data-src="${app.icon}" alt="" loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23272a3a' width='56' height='56' rx='12'/%3E%3C/svg%3E" />
             <div class="info">
               <div class="name" title="${esc(app.title)}">${esc(app.title)}</div>
               <div class="dev">${esc(app.developer)}</div>
@@ -802,19 +1521,78 @@
   }
 
   // ── Fetch & display ───────────────────────────────────────
+  let _activeController = null;  // AbortController for the current load
+
+  /**
+   * Map a frontend endpoint string to the backend timing key used
+   * in the request_timing table.
+   */
+  function _endpointToTimingKey(ep) {
+    if (ep === "/api/top")  return "top";
+    if (ep === "anime")     return "anime:apps";       // longest sub-request
+    if (ep === "niche-finder") return "niche_scores_all";
+    if (ep === "analysis")  return "top";               // loads /api/top
+    const catMatch = ep.match(/\/api\/category\/(.+)/);
+    if (catMatch) return "category:" + catMatch[1];
+    return null;
+  }
+
+  /**
+   * Fetch estimated duration from the backend for the given timing key.
+   * Returns seconds (number) or null if unknown.
+   */
+  async function _fetchEta(timingKey) {
+    if (!timingKey) return null;
+    try {
+      const res = await fetch("/api/eta?endpoint=" + encodeURIComponent(timingKey));
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.estimatedSeconds || null;
+    } catch (_) { return null; }
+  }
+
   async function loadEndpoint(endpoint) {
+    // Welcome page (no scraping needed)
+    if (endpoint === "welcome") {
+      if (_activeController) _activeController.abort();
+      // Refresh cache status before re-rendering
+      try {
+        const res = await fetch("/api/cache-status");
+        const data = await res.json();
+        _cacheStatus = data.cache || {};
+        _ttlHours    = data.ttlHours || 6;
+      } catch (_) {}
+      _renderWelcome();
+      return;
+    }
+
+    // Enforce frontend cooldown
+    if (!checkTabCooldown()) return;
+
+    // Cancel any in-flight request (user switched tabs fast)
+    if (_activeController) _activeController.abort();
+    _activeController = new AbortController();
+    const signal = _activeController.signal;
+
+    // Start polling backend throttle status after a short delay
+    const pollTimer = setTimeout(() => pollThrottleWhileLoading(signal), 1500);
+
     if (endpoint === "anime") {
-      return loadAnime();
+      return loadAnime(signal).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
     }
     if (endpoint === "niche-finder") {
-      return loadNicheFinder();
+      return loadNicheFinder(signal).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
     }
     if (endpoint === "analysis") {
-      return loadAnalysis();
+      return loadAnalysis(signal).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
     }
-    showLoading();
+
+    // Fetch ETA for this endpoint, show loading with estimate
+    const timingKey = _endpointToTimingKey(endpoint);
+    const eta = await _fetchEta(timingKey);
+    showLoading(eta);
     try {
-      const res = await apiFetch(endpoint);
+      const res = await apiFetch(endpoint, { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -825,31 +1603,42 @@
       if (catMatch) exportKey = catMatch[1];
 
       let html = renderToolbar(exportKey);
+      html += _renderCacheBanner(exportKey);
       html += renderApps(data.title, data.apps);
       $content.innerHTML = html;
+      loadImagesStaggered($content);
+      closeThrottleModal();
+      // Refresh cache status in background for the welcome page
+      _refreshCacheStatus();
     } catch (err) {
+      if (err.name === "AbortError") return; // user switched tabs
       showError(err.message);
+    } finally {
+      clearTimeout(pollTimer);
+      _stopEtaCountdown();
     }
   }
 
-  async function loadAnime() {
-    showLoading();
+  async function loadAnime(signal) {
+    const eta = await _fetchEta("anime:apps");
+    showLoading(eta);
     try {
-      // Fetch keywords and apps in parallel
-      const [kwRes, appRes] = await Promise.all([
-        apiFetch("/api/anime/keywords"),
-        apiFetch("/api/anime/apps"),
-      ]);
+      // Fetch keywords and apps sequentially to avoid parallel bursts
+      const kwRes = await apiFetch("/api/anime/keywords", { signal });
       if (!kwRes.ok) throw new Error(`Keywords: HTTP ${kwRes.status}`);
+      const kwData = await kwRes.json();
+
+      const appRes = await apiFetch("/api/anime/apps", { signal });
       if (!appRes.ok) throw new Error(`Apps: HTTP ${appRes.status}`);
-      const kwData  = await kwRes.json();
       const appData = await appRes.json();
 
       let html = "";
       html += renderKeywords(kwData.title, kwData.keywords);
       html += renderApps(appData.title, appData.apps);
       $content.innerHTML = html;
+      loadImagesStaggered($content);
     } catch (err) {
+      if (err.name === "AbortError") return;
       showError(err.message);
     }
   }
@@ -863,11 +1652,141 @@
     loadEndpoint(btn.dataset.endpoint);
   });
 
-  // ── Init: load categories, then load "All" ─────────────
-  (async () => {
+  // ── Init: load categories, build welcome page ──────────
+  const CATEGORY_ICONS = {
+    "All":            "📱", "Games": "🎮", "Social": "💬", "Entertainment": "🎬",
+    "Productivity":   "⚡", "Anime": "🎌", "Health": "❤️", "Finance": "💰",
+    "Education":      "📚", "AI":    "🤖", "Crypto": "₿",  "Shopping": "🛒",
+    "Food":           "🍔", "Travel":"✈️", "Music":  "🎵", "Photography": "📷",
+  };
+
+  let _categories = [];
+  let _cacheStatus = {};   // label -> {fetchedAt, ageMinutes, fresh}
+  let _ttlHours = 6;
+
+  function _timeAgo(minutes) {
+    if (minutes < 1)   return "just now";
+    if (minutes < 60)  return Math.round(minutes) + "m ago";
+    const h = Math.floor(minutes / 60);
+    const m = Math.round(minutes % 60);
+    return h + "h " + m + "m ago";
+  }
+
+  /**
+   * Map endpoint to cache label for lookup.
+   */
+  function _endpointToCacheLabel(ep) {
+    if (ep === "/api/top" || ep === "top") return "All (Top 100)";
+    if (ep === "anime") return "Anime";
+    const catMatch = ep.match(/\/api\/category\/(.+)/);
+    if (catMatch) return catMatch[1];
+    return null;
+  }
+
+  /**
+   * Render a small info banner showing cache status for the loaded data.
+   */
+  function _renderCacheBanner(exportKey) {
+    const label = exportKey === "top" ? "All (Top 100)" : exportKey;
+    const ci = _cacheStatus[label];
+    if (!ci) return '';
+    if (ci.fresh) {
+      return `<div class="wc-fresh-msg" style="margin-top:0;margin-bottom:14px">
+        ✓ <strong>Loaded from cache</strong> — scraped ${_timeAgo(ci.ageMinutes)}.
+        No new request was needed. Cache valid for ${_ttlHours}h.
+      </div>`;
+    }
+    return '';
+  }
+
+  /** Silently refresh cache status in the background. */
+  async function _refreshCacheStatus() {
     try {
-      const res = await apiFetch("/api/categories");
+      const res = await fetch("/api/cache-status");
+      const data = await res.json();
+      _cacheStatus = data.cache || {};
+      _ttlHours    = data.ttlHours || 6;
+    } catch (_) {}
+  }
+
+  function _renderWelcome() {
+    // Build list of all loadable categories
+    const entries = [
+      { name: "All (Top 100)", icon: "📱", endpoint: "/api/top",             cacheLabel: "All (Top 100)" },
+      { name: "Anime",         icon: "🎌", endpoint: "anime",                cacheLabel: "Anime" },
+      { name: "Niche Finder",  icon: "🔍", endpoint: "niche-finder",         cacheLabel: null },
+      { name: "Analysis",      icon: "📊", endpoint: "analysis",             cacheLabel: null },
+    ];
+    for (const cat of _categories) {
+      entries.push({
+        name: cat,
+        icon: CATEGORY_ICONS[cat] || "📂",
+        endpoint: `/api/category/${cat}`,
+        cacheLabel: cat,
+      });
+    }
+
+    // Count how many are fresh
+    const freshCount = entries.filter(e => e.cacheLabel && _cacheStatus[e.cacheLabel]?.fresh).length;
+
+    let html = `<div class="welcome">`;
+    html += `<h2>Welcome — What would you like to explore?</h2>`;
+    html += `<p class="subtitle">Pick a category below to load its top apps from Google Play.<br>
+              Scraping may take several minutes for fresh data. Cached results load instantly.</p>`;
+
+    if (freshCount > 0) {
+      html += `<div class="wc-fresh-msg">
+        <strong>✓ ${freshCount} categor${freshCount === 1 ? 'y has' : 'ies have'} cached data</strong> —
+        these will load instantly without any delay. Cache is valid for ${_ttlHours} hours.
+      </div>`;
+    }
+
+    html += `<div class="welcome-grid">`;
+    for (const e of entries) {
+      const ci = e.cacheLabel ? _cacheStatus[e.cacheLabel] : null;
+      let dotClass, cacheText;
+      if (!ci) {
+        dotClass  = "none";
+        cacheText = "not yet scraped";
+      } else if (ci.fresh) {
+        dotClass  = "fresh";
+        cacheText = "cached " + _timeAgo(ci.ageMinutes);
+      } else {
+        dotClass  = "stale";
+        cacheText = "stale — " + _timeAgo(ci.ageMinutes);
+      }
+      html += `
+        <div class="welcome-card" onclick="_launchEndpoint('${e.endpoint}')">
+          <div class="wc-name">
+            <span class="wc-icon">${e.icon}</span>
+            ${e.name}
+          </div>
+          <div class="wc-cache">
+            <span class="wc-dot ${dotClass}"></span>
+            <span class="wc-cache-text ${dotClass}">${cacheText}</span>
+          </div>
+        </div>`;
+    }
+    html += `</div></div>`;
+    $content.innerHTML = html;
+  }
+
+  /** Launch an endpoint from the welcome page (simulates tab click). */
+  function _launchEndpoint(endpoint) {
+    // Highlight the matching tab if it exists
+    const allBtns = $tabs.querySelectorAll(".tab-btn");
+    allBtns.forEach(b => {
+      b.classList.toggle("active", b.dataset.endpoint === endpoint);
+    });
+    loadEndpoint(endpoint);
+  }
+
+  (async () => {
+    // 1. Load category list
+    try {
+      const res = await fetch("/api/categories");
       const { categories } = await res.json();
+      _categories = categories;
       for (const cat of categories) {
         const btn = document.createElement("button");
         btn.className = "tab-btn";
@@ -875,9 +1794,18 @@
         btn.textContent = cat;
         $tabs.appendChild(btn);
       }
-    } catch (_) { /* categories are optional */ }
+    } catch (_) {}
 
-    loadEndpoint("/api/top");
+    // 2. Load cache status (lightweight, no scraping)
+    try {
+      const res = await fetch("/api/cache-status");
+      const data = await res.json();
+      _cacheStatus = data.cache || {};
+      _ttlHours    = data.ttlHours || 6;
+    } catch (_) {}
+
+    // 3. Show welcome page instead of auto-loading
+    _renderWelcome();
   })();
 
   // ── Modal logic ───────────────────────────────────────────
@@ -1074,15 +2002,17 @@
   }
 
   // ── Niche Finder ──────────────────────────────────────────
-  async function loadNicheFinder() {
-    showLoading();
+  async function loadNicheFinder(signal) {
+    const eta = await _fetchEta("niche_scores_all");
+    showLoading(eta);
     try {
-      const res = await apiFetch("/api/niche/scores");
+      const res = await apiFetch("/api/niche/scores", { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       $content.innerHTML = renderNicheScores(data.title, data.scores);
     } catch (err) {
+      if (err.name === "AbortError") return;
       showError(err.message);
     }
   }
@@ -1133,15 +2063,17 @@
   // ── Analysis & Comparison ─────────────────────────────────
   let _cachedAllApps = [];  // cache for dropdown population
 
-  async function loadAnalysis() {
-    showLoading();
+  async function loadAnalysis(signal) {
+    const eta = await _fetchEta("top");
+    showLoading(eta);
     // Load the general top apps for the dropdowns (from DB if cached)
     try {
-      const res = await apiFetch("/api/top");
+      const res = await apiFetch("/api/top", { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       _cachedAllApps = data.apps || [];
-    } catch (_) {
+    } catch (err) {
+      if (err.name === "AbortError") return;
       _cachedAllApps = [];
     }
 

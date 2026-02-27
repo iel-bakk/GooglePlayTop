@@ -61,6 +61,15 @@ def init_db():
             queried_at  TEXT    NOT NULL    -- ISO timestamp
         );
         CREATE INDEX IF NOT EXISTS idx_query_log_time ON query_log(queried_at);
+
+        CREATE TABLE IF NOT EXISTS request_timing (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            endpoint    TEXT    NOT NULL,   -- e.g. 'top', 'category:Games', 'anime'
+            duration    REAL    NOT NULL,   -- seconds the request took
+            cached      INTEGER NOT NULL DEFAULT 0,  -- 1 if served from cache
+            recorded_at TEXT    NOT NULL    -- ISO timestamp
+        );
+        CREATE INDEX IF NOT EXISTS idx_timing_ep ON request_timing(endpoint);
     """)
     conn.commit()
     conn.close()
@@ -215,6 +224,104 @@ def seconds_since_last_query():
     if last is None:
         return None
     return (datetime.utcnow() - last).total_seconds()
+
+
+# ---------------------------------------------------------------------------
+# Request timing – track how long each endpoint takes
+# ---------------------------------------------------------------------------
+
+def log_request_timing(endpoint, duration, cached=False):
+    """Record how long an endpoint request took."""
+    conn = _connect()
+    now = datetime.utcnow().isoformat()
+    conn.execute(
+        "INSERT INTO request_timing (endpoint, duration, cached, recorded_at) "
+        "VALUES (?, ?, ?, ?)",
+        (endpoint, round(duration, 2), 1 if cached else 0, now),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_avg_duration(endpoint):
+    """Return average duration (seconds) for an endpoint from the last 10
+    non-cached requests.  Falls back to cached requests if no non-cached
+    data exists. Returns None if no data at all."""
+    conn = _connect()
+    # Prefer non-cached timings
+    row = conn.execute(
+        "SELECT AVG(duration) as avg_dur, COUNT(*) as cnt "
+        "FROM (SELECT duration FROM request_timing "
+        "      WHERE endpoint = ? AND cached = 0 "
+        "      ORDER BY recorded_at DESC LIMIT 10)",
+        (endpoint,),
+    ).fetchone()
+    if row and row["cnt"] > 0:
+        conn.close()
+        return round(row["avg_dur"], 1)
+    # Fallback: cached timings (just to have some number)
+    row = conn.execute(
+        "SELECT AVG(duration) as avg_dur, COUNT(*) as cnt "
+        "FROM (SELECT duration FROM request_timing "
+        "      WHERE endpoint = ? "
+        "      ORDER BY recorded_at DESC LIMIT 10)",
+        (endpoint,),
+    ).fetchone()
+    conn.close()
+    if row is None or row["cnt"] == 0:
+        return None
+    return round(row["avg_dur"], 1)
+
+
+def get_all_avg_durations():
+    """Return a dict of endpoint -> avg duration for all known endpoints."""
+    conn = _connect()
+    rows = conn.execute(
+        "SELECT DISTINCT endpoint FROM request_timing WHERE cached = 0"
+    ).fetchall()
+    result = {}
+    for r in rows:
+        ep = r["endpoint"]
+        avg_row = conn.execute(
+            "SELECT AVG(duration) as avg_dur "
+            "FROM (SELECT duration FROM request_timing "
+            "      WHERE endpoint = ? AND cached = 0 "
+            "      ORDER BY recorded_at DESC LIMIT 10)",
+            (ep,),
+        ).fetchone()
+        if avg_row and avg_row["avg_dur"] is not None:
+            result[ep] = round(avg_row["avg_dur"], 1)
+    conn.close()
+    return result
+
+
+def get_cache_status():
+    """Return a dict with fetched_at timestamps for every cached key.
+
+    Returns: { cache_key: { "fetchedAt": ISO str, "ageMinutes": float, "fresh": bool } }
+    """
+    conn = _connect()
+    rows = conn.execute(
+        "SELECT cache_key, fetched_at FROM app_cache"
+    ).fetchall()
+    kw_rows = conn.execute(
+        "SELECT cache_key, fetched_at FROM keyword_cache"
+    ).fetchall()
+    conn.close()
+
+    now = datetime.utcnow()
+    result = {}
+    for r in list(rows) + list(kw_rows):
+        key = r["cache_key"]
+        fetched = datetime.fromisoformat(r["fetched_at"])
+        age_min = (now - fetched).total_seconds() / 60.0
+        fresh = age_min < CACHE_TTL_HOURS * 60
+        result[key] = {
+            "fetchedAt": r["fetched_at"],
+            "ageMinutes": round(age_min, 1),
+            "fresh": fresh,
+        }
+    return result
 
 
 # ---------------------------------------------------------------------------

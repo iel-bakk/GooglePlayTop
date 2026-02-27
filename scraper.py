@@ -206,37 +206,49 @@ def _check_blocked(exc):
         ) from exc
 
 # ── Throttle settings ────────────────────────────────────
-# Human-like delay: log-normal distribution produces mostly short waits
-# with occasional longer "reading" pauses, unlike uniform random which
-# is easily fingerprinted as bot traffic.
-MIN_DELAY = 1.5
-MAX_DELAY = 8.0
-SESSION_COOLDOWN = 90   # seconds between scraping sessions
+# Every single request to Google Play must respect a minimum gap.
+# This is enforced via the database query_log, so even concurrent
+# Flask requests (different tabs) cannot bypass it.
+MIN_DELAY = 10          # minimum seconds between ANY Google Play request
+MAX_DELAY = 16          # upper cap
+SESSION_COOLDOWN = 90   # seconds between batch scraping sessions
 _consecutive_errors = 0  # for exponential backoff
+import threading
+_throttle_lock = threading.Lock()
 
 def _throttle():
-    """Sleep with a human-like timing pattern (log-normal + jitter).
+    """Enforce a global minimum gap between requests.
 
-    Most pauses are 2-4s (quick browsing), but occasionally a longer
-    7-8s pause simulates reading a page before the next click.
+    Uses the database query_log so that even concurrent Flask
+    requests (user switching tabs fast) are serialised.
     """
     global _consecutive_errors
 
-    # Log-normal: median ~2.5s, occasional spikes to 6-8s
-    base = random.lognormvariate(mu=0.9, sigma=0.45)
-    delay = max(MIN_DELAY, min(base, MAX_DELAY))
+    with _throttle_lock:
+        # Check how long since the LAST request (any type)
+        elapsed = seconds_since_last_query()
+        if elapsed is not None and elapsed < MIN_DELAY:
+            wait = MIN_DELAY - elapsed
+            # Add human jitter (0-3s extra)
+            wait += random.uniform(0, 3.0)
+            print(f"  [THROTTLE] Last request was {elapsed:.1f}s ago. "
+                  f"Waiting {wait:.1f}s…")
+            time.sleep(wait)
+        else:
+            # Still add a small human-like pause (1-4s)
+            time.sleep(random.uniform(1.0, 4.0))
 
-    # 10 % chance of a longer "reading" pause (5-12s)
-    if random.random() < 0.10:
-        delay += random.uniform(3.0, 7.0)
+        # 12% chance of a longer "reading" pause (5-10s)
+        if random.random() < 0.12:
+            extra = random.uniform(5.0, 10.0)
+            print(f"  [PAUSE] Reading pause +{extra:.1f}s")
+            time.sleep(extra)
 
-    # Exponential backoff when errors are piling up
-    if _consecutive_errors > 0:
-        backoff = min(2 ** _consecutive_errors, 60)
-        delay += backoff
-        print(f"  [BACKOFF] +{backoff}s (error streak: {_consecutive_errors})")
-
-    time.sleep(delay)
+        # Exponential backoff when errors are piling up
+        if _consecutive_errors > 0:
+            backoff = min(2 ** _consecutive_errors, 60)
+            print(f"  [BACKOFF] +{backoff}s (error streak: {_consecutive_errors})")
+            time.sleep(backoff)
 
 def _record_success():
     global _consecutive_errors

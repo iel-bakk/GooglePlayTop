@@ -5,6 +5,7 @@ Serves a frontend and exposes API endpoints that return scraped data.
 
 import csv
 import io
+import time as _time
 from flask import Flask, jsonify, send_from_directory, Response, request
 from scraper import (
     fetch_general_top,
@@ -19,9 +20,14 @@ from scraper import (
     CATEGORY_QUERIES,
     NICHE_KEYWORD_SEEDS,
     IPBlockedError,
+    MIN_DELAY,
+    SESSION_COOLDOWN,
 )
 from database import (
     save_snapshot, get_snapshots, get_latest_two_snapshots,
+    seconds_since_last_query,
+    log_request_timing, get_avg_duration, get_all_avg_durations,
+    get_cache_status, CACHE_TTL_HOURS,
 )
 
 app = Flask(__name__, static_folder="static")
@@ -51,14 +57,83 @@ def api_proxy_status():
     return jsonify(get_proxy_status())
 
 
+@app.route("/api/cache-status")
+def api_cache_status():
+    """Return freshness info for every cached category / key."""
+    raw = get_cache_status()
+    # Build a user-friendly mapping: readable label -> status
+    friendly = {}
+    for key, info in raw.items():
+        # Translate cache keys to readable names
+        if key.startswith("general_top_"):
+            label = "All (Top 100)"
+        elif key.startswith("cat_"):
+            parts = key.split("_", 2)  # cat_Anime_100_us_en
+            label = parts[1] if len(parts) > 1 else key
+        elif key.startswith("niche_kw_"):
+            parts = key.split("_", 3)  # niche_kw_Anime_us_en
+            label = parts[2] + " keywords" if len(parts) > 2 else key
+        else:
+            label = key
+        friendly[label] = info
+    return jsonify({"cache": friendly, "ttlHours": CACHE_TTL_HOURS})
+
+
+@app.route("/api/throttle-status")
+def api_throttle_status():
+    """Return current throttle/cooldown state."""
+    elapsed = seconds_since_last_query()
+    if elapsed is None:
+        return jsonify({"waiting": False, "waitSeconds": 0, "elapsed": None})
+
+    wait_needed = MIN_DELAY - elapsed
+    return jsonify({
+        "waiting": wait_needed > 0,
+        "waitSeconds": round(max(0, wait_needed), 1),
+        "elapsed": round(elapsed, 1),
+        "minDelay": MIN_DELAY,
+        "sessionCooldown": SESSION_COOLDOWN,
+    })
+
+
 # ---------------------------------------------------------------------------
 # API
 # ---------------------------------------------------------------------------
 
+@app.route("/api/eta")
+def api_eta():
+    """Return estimated request durations based on past timings."""
+    # Default estimates (seconds) for when there's no historical data yet.
+    # Based on typical scraping durations: queries × ~12s delay + enrichment.
+    _DEFAULTS = {
+        "top": 900,                 # 7 queries + ~100 enrichments
+        "anime:keywords": 250,      # 20 keyword probes
+        "anime:apps": 120,          # 8 queries + enrichment
+        "niche_scores_all": 1800,   # all niches × keywords + apps
+    }
+    # Category defaults: ~4 queries + ~100 enrichments ≈ 180s
+    for cat in CATEGORY_QUERIES:
+        _DEFAULTS[f"category:{cat}"] = 180
+
+    endpoint = request.args.get("endpoint", "")
+    if endpoint:
+        avg = get_avg_duration(endpoint)
+        if avg is None:
+            avg = _DEFAULTS.get(endpoint)
+        return jsonify({"endpoint": endpoint, "estimatedSeconds": avg})
+    # Return all known durations (merge defaults with actuals)
+    actuals = get_all_avg_durations()
+    merged = {**_DEFAULTS, **actuals}
+    return jsonify({"durations": merged})
+
+
 @app.route("/api/top")
 def api_top():
     """Return top 100 most-downloaded apps (general)."""
+    t0 = _time.time()
     apps = fetch_general_top(count=100)
+    dur = _time.time() - t0
+    log_request_timing("top", dur, cached=(dur < 2))
     data = []
     for i, a in enumerate(apps, start=1):
         entry = serialize_app(a)
@@ -73,7 +148,10 @@ def api_category(category_name):
     if category_name not in CATEGORY_QUERIES:
         return jsonify({"error": f"Unknown category: {category_name}"}), 404
 
+    t0 = _time.time()
     apps = fetch_category_top(category_name, count=100)
+    dur = _time.time() - t0
+    log_request_timing(f"category:{category_name}", dur, cached=(dur < 2))
     data = []
     for i, a in enumerate(apps, start=1):
         entry = serialize_app(a)
@@ -91,14 +169,20 @@ def api_categories():
 @app.route("/api/anime/keywords")
 def api_anime_keywords():
     """Return top searched anime-related keywords on Google Play."""
+    t0 = _time.time()
     keywords = fetch_anime_keywords()
+    dur = _time.time() - t0
+    log_request_timing("anime:keywords", dur, cached=(dur < 2))
     return jsonify({"title": "Top Anime Search Keywords on Google Play", "keywords": keywords})
 
 
 @app.route("/api/anime/apps")
 def api_anime_apps():
     """Return top anime apps from Google Play."""
+    t0 = _time.time()
     apps = fetch_category_top("Anime", count=100)
+    dur = _time.time() - t0
+    log_request_timing("anime:apps", dur, cached=(dur < 2))
     data = []
     for i, a in enumerate(apps, start=1):
         entry = serialize_app(a)
@@ -131,7 +215,10 @@ def api_niche_keywords(niche_name):
     """Return keyword popularity data for a given niche."""
     if niche_name not in NICHE_KEYWORD_SEEDS:
         return jsonify({"error": f"Unknown niche: {niche_name}"}), 404
+    t0 = _time.time()
     kws = fetch_niche_keywords(niche_name)
+    dur = _time.time() - t0
+    log_request_timing(f"niche:{niche_name}", dur, cached=(dur < 2))
     return jsonify({"title": f"{niche_name} – Top Keywords", "keywords": kws})
 
 
@@ -140,17 +227,23 @@ def api_niche_score(niche_name):
     """Compute and return the opportunity score for a niche."""
     if niche_name not in NICHE_KEYWORD_SEEDS:
         return jsonify({"error": f"Unknown niche: {niche_name}"}), 404
+    t0 = _time.time()
     score = compute_niche_score(niche_name)
+    dur = _time.time() - t0
+    log_request_timing(f"niche_score:{niche_name}", dur, cached=(dur < 2))
     return jsonify(score)
 
 
 @app.route("/api/niche/scores")
 def api_all_niche_scores():
     """Compute opportunity scores for ALL niches (may be slow on first run)."""
+    t0 = _time.time()
     scores = []
     for niche in NICHE_KEYWORD_SEEDS:
         scores.append(compute_niche_score(niche))
     scores.sort(key=lambda s: s["opportunityScore"], reverse=True)
+    dur = _time.time() - t0
+    log_request_timing("niche_scores_all", dur, cached=(dur < 2))
     return jsonify({"title": "Niche Opportunity Scores", "scores": scores})
 
 
