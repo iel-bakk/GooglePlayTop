@@ -188,6 +188,24 @@ def api_top():
     finally:
         _finish_task("top", cancel)
 
+@app.route("/api/search/<keyword>")
+def api_search_keyword(keyword):
+    """Return top 50 apps for a given search keyword (not a category)."""
+    from scraper import search_top_apps
+    cancel = _start_task("search")
+    try:
+        t0 = _time.time()
+        apps = search_top_apps(keyword, count=50, cancel_event=cancel)
+        dur = _time.time() - t0
+        log_request_timing(f"search:{keyword}", dur, cached=(dur < 2))
+        data = []
+        for i, a in enumerate(apps, start=1):
+            entry = serialize_app(a)
+            entry["rank"] = i
+            data.append(entry)
+        return jsonify({"title": f"Top results for '{keyword}'", "apps": data})
+    finally:
+        _finish_task("search", cancel)
 
 @app.route("/api/category/<category_name>")
 def api_category(category_name):
@@ -264,6 +282,9 @@ def api_app_detail(app_id):
     if not details:
         return jsonify({"error": f"App not found: {app_id}"}), 404
     return jsonify(serialize_app(details))
+
+
+
 
 
 # ---------------------------------------------------------------------------
