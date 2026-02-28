@@ -766,6 +766,301 @@
     .tab-btn.add-cat-btn:hover {
       background: rgba(124,58,237,.1);
     }
+
+    /* ── Insights Panel ────────────────────────────────────── */
+    .insights-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+      margin-bottom: 22px;
+    }
+    .insights-panel h3 {
+      font-size: .95rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .insight-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .insight-stat {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .insight-stat .is-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent-soft);
+    }
+    .insight-stat .is-label {
+      font-size: .68rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+    .insight-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 700px) {
+      .insight-detail-grid { grid-template-columns: 1fr; }
+    }
+    .insight-detail-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .insight-detail-box h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .insight-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: .78rem;
+    }
+    .insight-bar-label {
+      min-width: 90px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .insight-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--bg-body);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .insight-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .4s ease;
+    }
+    .insight-bar-count {
+      min-width: 28px;
+      text-align: right;
+      font-weight: 600;
+      color: var(--text);
+      font-size: .72rem;
+    }
+
+    /* ── Filter Bar ────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+    .filter-bar label {
+      font-size: .75rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .filter-bar select,
+    .filter-bar input[type="text"] {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-body);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .78rem;
+    }
+    .filter-bar select:focus,
+    .filter-bar input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .filter-bar .filter-count {
+      margin-left: auto;
+      font-size: .75rem;
+      color: var(--text-muted);
+    }
+    .filter-bar .filter-reset {
+      background: none; border: none;
+      color: var(--accent-soft);
+      font-family: var(--font);
+      font-size: .75rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* ── Bookmark star on cards ─────────────────────────────── */
+    .card .bookmark-star {
+      position: absolute;
+      top: 6px; right: 8px;
+      background: none; border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity .2s;
+      z-index: 5;
+    }
+    .card { position: relative; }
+    .card:hover .bookmark-star { opacity: 1; }
+    .card .bookmark-star.active, .card .bookmark-star.bookmarked { opacity: 1; color: #facc15; }
+
+    /* ── Category Comparison ────────────────────────────────── */
+    .cat-compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    @media (max-width: 700px) {
+      .cat-compare-grid { grid-template-columns: 1fr; }
+    }
+    .cat-compare-col {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+    .cat-compare-col h4 {
+      font-size: .9rem; font-weight: 600; color: #fff;
+      margin-bottom: 14px;
+    }
+    .cc-metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: .82rem;
+    }
+    .cc-metric .cc-label { color: var(--text-secondary); }
+    .cc-metric .cc-value { font-weight: 600; color: var(--text); }
+    .cc-better { color: var(--green) !important; }
+    .cc-worse  { color: var(--red) !important; }
+
+    /* ── Cluster view ──────────────────────────────────────── */
+    .cluster-section { margin-bottom: 24px; }
+    .cluster-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+    .cluster-group h4 {
+      font-size: .85rem; font-weight: 600; color: var(--accent-soft);
+      margin-bottom: 10px;
+    }
+    .cluster-apps {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .cluster-app {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-size: .78rem;
+      color: var(--text);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .cluster-app img {
+      width: 20px; height: 20px; border-radius: 4px;
+    }
+    .cluster-label {
+      font-size: .9rem; font-weight: 600; margin-bottom: 8px;
+    }
+    .cluster-icon {
+      width: 20px; height: 20px; border-radius: 4px;
+    }
+
+    /* ── Growth table ──────────────────────────────────────── */
+    .growth-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+    .growth-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 2px solid var(--border);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .growth-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text);
+    }
+    .growth-up { color: var(--green); }
+    .growth-new { color: var(--yellow); font-style: italic; }
+
+    /* ── Note form in modal ────────────────────────────────── */
+    .note-section {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .note-section h4 {
+      font-size: .82rem; font-weight: 600; color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .note-section textarea {
+      width: 100%; box-sizing: border-box;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-body);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .82rem;
+      min-height: 60px;
+      resize: vertical;
+    }
+    .note-section textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .note-section .note-actions {
+      display: flex; gap: 8px; margin-top: 8px; align-items: center;
+    }
+    .note-section .note-save-btn {
+      padding: 6px 16px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: .78rem; font-weight: 600;
+      cursor: pointer;
+    }
+    .note-section .note-bookmark-btn {
+      background: none; border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      color: var(--text-secondary);
+      font-size: .85rem;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .note-section .note-bookmark-btn.active {
+      border-color: #facc15;
+      color: #facc15;
+    }
     .niche-card .niche-score-area {
       min-height: 28px;
       margin-top: 10px;
@@ -1916,13 +2211,14 @@
   }
 
   function renderApps(title, apps) {
-    let html = `<h2 class="section-title">${title} (${apps.length} apps)</h2><div class="grid">`;
+    let html = `<h2 class="section-title">${title} (${apps.length} apps)</h2><div class="grid" id="appGrid">`;
     for (const app of apps) {
       const topClass = app.rank <= 3 ? "top3" : "";
       const stars = app.score ? "⭐ " + app.score.toFixed(1) : "";
       html += `
-        <div class="card-link" data-appid="${esc(app.appId)}" style="cursor:pointer">
+        <div class="card-link" data-appid="${esc(app.appId)}" style="cursor:pointer" data-rank="${app.rank}" data-score="${app.score||0}" data-installs="${app.realInstalls||0}" data-free="${app.free?1:0}" data-dev="${esc(app.developer)}">
           <div class="card">
+            <button class="bookmark-star" data-appid="${esc(app.appId)}" onclick="event.stopPropagation();toggleBookmark('${esc(app.appId)}')" title="Bookmark">☆</button>
             <span class="rank ${topClass}">#${app.rank}</span>
             <img class="icon" data-src="${app.icon}" alt="" loading="lazy" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%23272a3a' width='56' height='56' rx='12'/%3E%3C/svg%3E" />
             <div class="info">
@@ -2043,11 +2339,22 @@
       const catMatch = endpoint.match(/\/api\/category\/(.+)/);
       if (catMatch) exportKey = catMatch[1];
 
+      // Store apps for filtering
+      _currentApps = data.apps;
+      _currentTitle = data.title;
+      _currentExportKey = exportKey;
+
       let html = renderToolbar(exportKey);
       html += _renderCacheBanner(exportKey);
       html += renderApps(data.title, data.apps);
       $content.innerHTML = html;
+
+      // DOM-modifying functions (must run after innerHTML is set)
+      renderInsightsPanel(data.apps);
+      renderFilterBar(data.apps);
+      _attachFilterListeners();
       loadImagesStaggered($content);
+      _loadBookmarkStars(data.apps);
       closeThrottleModal();
       // Refresh cache status in background for the welcome page
       _refreshCacheStatus();
@@ -2118,6 +2425,12 @@
   let _customNiches = [];  // [{name, keywordCount, builtin}]
   let _cacheStatus = {};   // label -> {fetchedAt, ageMinutes, fresh}
   let _ttlHours = 6;
+
+  // New feature state
+  let _currentApps = [];
+  let _currentTitle = "";
+  let _currentExportKey = "top";
+  let _bookmarkedIds = new Set();
 
   function _timeAgo(minutes) {
     if (minutes < 1)   return "just now";
@@ -2318,7 +2631,8 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const app = await res.json();
       if (app.error) throw new Error(app.error);
-      $modalContent.innerHTML = renderDetail(app);
+      const noteHtml = await renderNoteSection(appId);
+      $modalContent.innerHTML = renderDetail(app) + noteHtml;
     } catch (err) {
       $modalContent.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
     }
@@ -2743,6 +3057,526 @@
     }
   }
 
+  // ── Insights Panel ──────────────────────────────────────────
+  function computeInsights(apps) {
+    if (!apps || !apps.length) return null;
+    const total = apps.length;
+    const scored = apps.filter(a => a.score > 0);
+    const avgRating = scored.length ? (scored.reduce((s,a)=>s+a.score,0)/scored.length) : 0;
+    const below4 = scored.filter(a => a.score < 4).length;
+    const pctBelow4 = scored.length ? Math.round(below4/scored.length*100) : 0;
+
+    // Install distribution
+    const brackets = [
+      {label:'1B+', min:1e9}, {label:'100M+', min:1e8}, {label:'10M+', min:1e7},
+      {label:'1M+', min:1e6}, {label:'100K+', min:1e5}, {label:'<100K', min:0}
+    ];
+    const installDist = brackets.map(b => ({
+      label: b.label,
+      count: apps.filter(a => {
+        const v = a.realInstalls||0;
+        if (b.min === 0) return v < 1e5;
+        const nextIdx = brackets.findIndex(x=>x===b)-1;
+        const max = nextIdx >= 0 ? brackets[nextIdx].min : Infinity;
+        return v >= b.min && v < max;
+      }).length
+    }));
+
+    // Developer concentration
+    const devCounts = {};
+    apps.forEach(a => { devCounts[a.developer] = (devCounts[a.developer]||0)+1; });
+    const devEntries = Object.entries(devCounts).sort((a,b)=>b[1]-a[1]);
+    const topDevs = devEntries.slice(0,5).map(([name,count])=>({name,count}));
+    const uniqueDevs = devEntries.length;
+
+    // Free vs paid
+    const freeCount = apps.filter(a=>a.free).length;
+    const paidCount = total - freeCount;
+
+    // Genre distribution
+    const genreCounts = {};
+    apps.forEach(a => { if(a.genre) genreCounts[a.genre]=(genreCounts[a.genre]||0)+1; });
+    const topGenres = Object.entries(genreCounts).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([name,count])=>({name,count}));
+
+    // Quality gap: low-rated apps with high installs = opportunity
+    const qualityGaps = apps.filter(a => a.score > 0 && a.score < 3.5 && (a.realInstalls||0) > 100000)
+      .sort((a,b)=>(b.realInstalls||0)-(a.realInstalls||0)).slice(0,5);
+
+    // Revenue estimate (rough): paid apps price * installs * 0.7 (Google cut)
+    const revenueApps = apps.filter(a => !a.free && a.price > 0).map(a => ({
+      ...a, estRevenue: Math.round(a.price * (a.realInstalls||0) * 0.7)
+    })).sort((a,b)=>b.estRevenue-a.estRevenue).slice(0,5);
+
+    // Keyword extraction from titles
+    const stopWords = new Set(['the','a','an','and','or','for','of','to','in','on','by','with','is','it','my','&','-','–','—','app','free','pro','lite','premium']);
+    const wordCounts = {};
+    apps.forEach(a => {
+      const words = a.title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>2 && !stopWords.has(w));
+      words.forEach(w => { wordCounts[w]=(wordCounts[w]||0)+1; });
+    });
+    const topKeywords = Object.entries(wordCounts).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([word,count])=>({word,count}));
+
+    return { total, avgRating, pctBelow4, installDist, topDevs, uniqueDevs, freeCount, paidCount, topGenres, qualityGaps, revenueApps, topKeywords };
+  }
+
+  function renderInsightsPanel(apps) {
+    const existing = document.querySelector('.insights-panel');
+    if (existing) existing.remove();
+    const ins = computeInsights(apps);
+    if (!ins) return;
+
+    const maxInstall = Math.max(...ins.installDist.map(d=>d.count),1);
+    const maxGenre = Math.max(...ins.topGenres.map(d=>d.count),1);
+
+    let html = `<div class="insights-panel">
+      <h3 style="margin:0 0 12px">📊 Market Insights</h3>
+      <div class="insight-stats">
+        <div class="insight-stat"><span class="insight-stat-value">${ins.total}</span><span class="insight-stat-label">Apps</span></div>
+        <div class="insight-stat"><span class="insight-stat-value">${ins.avgRating.toFixed(1)}</span><span class="insight-stat-label">Avg Rating</span></div>
+        <div class="insight-stat"><span class="insight-stat-value">${ins.pctBelow4}%</span><span class="insight-stat-label">Below 4★</span></div>
+        <div class="insight-stat"><span class="insight-stat-value">${ins.uniqueDevs}</span><span class="insight-stat-label">Developers</span></div>
+        <div class="insight-stat"><span class="insight-stat-value">${ins.freeCount}</span><span class="insight-stat-label">Free</span></div>
+        <div class="insight-stat"><span class="insight-stat-value">${ins.paidCount}</span><span class="insight-stat-label">Paid</span></div>
+      </div>
+      <div class="insight-detail-grid">
+        <div class="insight-detail-box">
+          <h4>📥 Install Distribution</h4>
+          ${ins.installDist.map(d=>`<div class="insight-bar-row"><span class="insight-bar-label">${d.label}</span><div class="insight-bar-track"><div class="insight-bar-fill" style="width:${Math.round(d.count/maxInstall*100)}%"></div></div><span class="insight-bar-value">${d.count}</span></div>`).join('')}
+        </div>
+        <div class="insight-detail-box">
+          <h4>🏷️ Top Genres</h4>
+          ${ins.topGenres.map(d=>`<div class="insight-bar-row"><span class="insight-bar-label">${esc(d.name)}</span><div class="insight-bar-track"><div class="insight-bar-fill" style="width:${Math.round(d.count/maxGenre*100)}%"></div></div><span class="insight-bar-value">${d.count}</span></div>`).join('')}
+        </div>
+        <div class="insight-detail-box">
+          <h4>👨‍💻 Top Developers</h4>
+          ${ins.topDevs.map(d=>`<div class="insight-bar-row"><span class="insight-bar-label" title="${esc(d.name)}">${esc(d.name.length>20?d.name.slice(0,20)+'…':d.name)}</span><div class="insight-bar-track"><div class="insight-bar-fill" style="width:${Math.round(d.count/ins.topDevs[0].count*100)}%"></div></div><span class="insight-bar-value">${d.count}</span></div>`).join('')}
+        </div>
+        <div class="insight-detail-box">
+          <h4>🔑 Title Keywords</h4>
+          ${ins.topKeywords.map(d=>`<div class="insight-bar-row"><span class="insight-bar-label">${esc(d.word)}</span><div class="insight-bar-track"><div class="insight-bar-fill" style="width:${Math.round(d.count/ins.topKeywords[0].count*100)}%"></div></div><span class="insight-bar-value">${d.count}</span></div>`).join('')}
+        </div>`;
+
+    // Quality gaps
+    if (ins.qualityGaps.length) {
+      html += `<div class="insight-detail-box" style="grid-column:1/-1">
+        <h4>⚠️ Quality Gap Opportunities <small style="font-weight:400;color:var(--text-secondary)">(Low-rated apps with high installs)</small></h4>
+        <table class="growth-table"><thead><tr><th>App</th><th>Rating</th><th>Installs</th><th>Developer</th></tr></thead><tbody>
+        ${ins.qualityGaps.map(a=>`<tr><td>${esc(a.title)}</td><td>⭐ ${a.score.toFixed(1)}</td><td>${(a.realInstalls||0).toLocaleString()}</td><td>${esc(a.developer)}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    }
+
+    // Revenue estimates
+    if (ins.revenueApps.length) {
+      html += `<div class="insight-detail-box" style="grid-column:1/-1">
+        <h4>💰 Top Revenue Estimates <small style="font-weight:400;color:var(--text-secondary)">(Paid apps only, rough estimate)</small></h4>
+        <table class="growth-table"><thead><tr><th>App</th><th>Price</th><th>Installs</th><th>Est. Revenue</th></tr></thead><tbody>
+        ${ins.revenueApps.map(a=>`<tr><td>${esc(a.title)}</td><td>$${a.price.toFixed(2)}</td><td>${(a.realInstalls||0).toLocaleString()}</td><td>$${a.estRevenue.toLocaleString()}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    }
+
+    html += `</div>`;
+
+    // Add clusters
+    html += renderClusters(apps);
+
+    html += `</div>`;
+
+    const $content = document.getElementById("mainContent");
+    const grid = $content.querySelector('#appGrid');
+    if (grid) grid.insertAdjacentHTML('beforebegin', html);
+  }
+
+  // ── Filter Bar ──────────────────────────────────────────────
+  function renderFilterBar(apps) {
+    const existing = document.querySelector('.filter-bar');
+    if (existing) existing.remove();
+    if (!apps || !apps.length) return;
+
+    const html = `<div class="filter-bar">
+      <input type="text" id="filterSearch" class="filter-control" placeholder="🔍 Search apps..." style="flex:2">
+      <select id="filterRating" class="filter-control">
+        <option value="">All Ratings</option>
+        <option value="4.5">4.5+ ★</option>
+        <option value="4">4+ ★</option>
+        <option value="3">3+ ★</option>
+        <option value="0-3">Below 3 ★</option>
+      </select>
+      <select id="filterInstalls" class="filter-control">
+        <option value="">All Installs</option>
+        <option value="1e9">1B+</option>
+        <option value="1e8">100M+</option>
+        <option value="1e7">10M+</option>
+        <option value="1e6">1M+</option>
+        <option value="1e5">100K+</option>
+        <option value="0-1e5">Under 100K</option>
+      </select>
+      <select id="filterType" class="filter-control">
+        <option value="">Free & Paid</option>
+        <option value="free">Free Only</option>
+        <option value="paid">Paid Only</option>
+      </select>
+      <button id="filterReset" class="filter-control" style="background:var(--accent);color:#fff;cursor:pointer;border:none;padding:6px 12px;border-radius:8px">Reset</button>
+    </div>`;
+
+    const $content = document.getElementById("mainContent");
+    const panel = $content.querySelector('.insights-panel');
+    const grid = $content.querySelector('#appGrid');
+    if (panel) panel.insertAdjacentHTML('afterend', html);
+    else if (grid) grid.insertAdjacentHTML('beforebegin', html);
+  }
+
+  function _attachFilterListeners() {
+    const search = document.getElementById('filterSearch');
+    const rating = document.getElementById('filterRating');
+    const installs = document.getElementById('filterInstalls');
+    const type = document.getElementById('filterType');
+    const reset = document.getElementById('filterReset');
+    if (!search) return;
+
+    const applyFilters = () => {
+      const q = search.value.toLowerCase();
+      const rVal = rating.value;
+      const iVal = installs.value;
+      const tVal = type.value;
+
+      let filtered = _currentApps.filter(app => {
+        // Search
+        if (q && !app.title.toLowerCase().includes(q) && !app.developer.toLowerCase().includes(q)) return false;
+        // Rating
+        if (rVal === '0-3' && (app.score||0) >= 3) return false;
+        if (rVal && rVal !== '0-3' && (app.score||0) < parseFloat(rVal)) return false;
+        // Installs
+        if (iVal && iVal.startsWith('0-')) {
+          if ((app.realInstalls||0) >= parseFloat(iVal.split('-')[1])) return false;
+        } else if (iVal && (app.realInstalls||0) < parseFloat(iVal)) return false;
+        // Type
+        if (tVal === 'free' && !app.free) return false;
+        if (tVal === 'paid' && app.free) return false;
+        return true;
+      });
+
+      // Re-rank
+      filtered = filtered.map((a,i)=>({...a, rank:i+1}));
+
+      const grid = document.getElementById('appGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      for (const app of filtered) {
+        const topClass = app.rank <= 3 ? "top3" : "";
+        const stars = app.score ? "⭐ " + app.score.toFixed(1) : "";
+        const isBookmarked = _bookmarkedIds.has(app.appId);
+        grid.innerHTML += `
+          <div class="card-link" data-appid="${esc(app.appId)}" style="cursor:pointer" data-rank="${app.rank}" data-score="${app.score||0}" data-installs="${app.realInstalls||0}" data-free="${app.free?1:0}" data-dev="${esc(app.developer)}">
+            <div class="card">
+              <button class="bookmark-star${isBookmarked?' bookmarked':''}" data-appid="${esc(app.appId)}" onclick="event.stopPropagation();toggleBookmark('${esc(app.appId)}')" title="Bookmark">${isBookmarked?'★':'☆'}</button>
+              <span class="rank ${topClass}">#${app.rank}</span>
+              <img class="icon" src="${app.icon}" alt="" loading="lazy" />
+              <div class="info">
+                <div class="name" title="${esc(app.title)}">${esc(app.title)}</div>
+                <div class="dev">${esc(app.developer)}</div>
+              </div>
+              <div class="meta">
+                <div class="installs">${app.installs}</div>
+                <div class="rating">${stars}</div>
+                <div class="genre">${esc(app.genre)}</div>
+              </div>
+            </div>
+          </div>`;
+      }
+      // Update count in title
+      const titleEl = document.querySelector('.section-title');
+      if (titleEl) titleEl.textContent = `${_currentTitle} (${filtered.length} apps)`;
+      // Re-attach card clicks & lazy load
+      _attachCardClicks();
+      loadImagesStaggered(document.getElementById('appGrid'));
+      _loadBookmarkStars(filtered);
+    };
+
+    search.addEventListener('input', applyFilters);
+    rating.addEventListener('change', applyFilters);
+    installs.addEventListener('change', applyFilters);
+    type.addEventListener('change', applyFilters);
+    reset.addEventListener('click', () => {
+      search.value = ''; rating.value = ''; installs.value = ''; type.value = '';
+      applyFilters();
+    });
+  }
+
+  // ── Bookmarks & Notes ───────────────────────────────────────
+  async function _loadBookmarkStars(apps) {
+    try {
+      const res = await apiFetch('/api/bookmarks');
+      if (!res.ok) return;
+      const data = await res.json();
+      _bookmarkedIds = new Set((data.bookmarks||[]).map(b=>b.app_id));
+    } catch(e) { /* ignore */ }
+
+    document.querySelectorAll('.bookmark-star').forEach(btn => {
+      const id = btn.dataset.appid;
+      if (_bookmarkedIds.has(id)) {
+        btn.classList.add('bookmarked');
+        btn.textContent = '★';
+      }
+    });
+  }
+
+  window.toggleBookmark = async function(appId) {
+    const isBookmarked = _bookmarkedIds.has(appId);
+    try {
+      if (isBookmarked) {
+        await apiFetch(`/api/notes/${encodeURIComponent(appId)}`, {method:'DELETE'});
+        _bookmarkedIds.delete(appId);
+      } else {
+        await apiFetch(`/api/notes/${encodeURIComponent(appId)}`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({note_text:'', bookmarked:1})
+        });
+        _bookmarkedIds.add(appId);
+      }
+    } catch(e) { /* ignore */ }
+
+    document.querySelectorAll(`.bookmark-star[data-appid="${appId}"]`).forEach(btn => {
+      const now = _bookmarkedIds.has(appId);
+      btn.classList.toggle('bookmarked', now);
+      btn.textContent = now ? '★' : '☆';
+    });
+  };
+
+  // ── App Clustering ──────────────────────────────────────────
+  function clusterApps(apps) {
+    const stopWords = new Set(['the','a','an','and','or','for','of','to','in','on','by','with','is','it','my','&','-','–','—','app','free','pro','lite','premium','best','new','top']);
+    // Extract significant words per app
+    const appWords = apps.map(a => {
+      const words = a.title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>2 && !stopWords.has(w));
+      return { app: a, words: new Set(words) };
+    });
+
+    // Find clusters around common keywords
+    const wordApps = {};
+    appWords.forEach(({app, words}) => {
+      words.forEach(w => {
+        if (!wordApps[w]) wordApps[w] = [];
+        wordApps[w].push(app);
+      });
+    });
+
+    // Only keep words that appear in 3+ apps
+    const clusters = Object.entries(wordApps)
+      .filter(([w,apps])=>apps.length>=3)
+      .sort((a,b)=>b[1].length-a[1].length)
+      .slice(0,8)
+      .map(([word,apps])=>({keyword:word, apps:apps.slice(0,10), count:apps.length}));
+
+    return clusters;
+  }
+
+  function renderClusters(apps) {
+    const clusters = clusterApps(apps);
+    if (!clusters.length) return '';
+
+    let html = `<div class="cluster-section"><h3>🔗 App Clusters by Keyword</h3>`;
+    clusters.forEach(c => {
+      html += `<div class="cluster-group"><div class="cluster-label">"${esc(c.keyword)}" <span style="color:var(--text-secondary)">(${c.count} apps)</span></div>`;
+      html += `<div class="cluster-apps">`;
+      c.apps.forEach(a => {
+        html += `<div class="cluster-app" title="${esc(a.title)}"><img src="${a.icon}" class="cluster-icon" loading="lazy"/><span>${esc(a.title.length>25?a.title.slice(0,25)+'…':a.title)}</span></div>`;
+      });
+      html += `</div></div>`;
+    });
+    html += `</div>`;
+    return html;
+  }
+
+  // ── Category Comparison ─────────────────────────────────────
+  async function loadCategoryComparison() {
+    const $content = document.getElementById("mainContent");
+    $content.innerHTML = `<h2 class="section-title">📊 Category Comparison</h2>
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
+        <div><label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px">Category A</label>
+          <select id="compareA" class="filter-control" style="min-width:200px"></select></div>
+        <div><label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px">Category B</label>
+          <select id="compareB" class="filter-control" style="min-width:200px"></select></div>
+        <button onclick="runComparison()" style="background:var(--accent);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:600">Compare</button>
+      </div>
+      <div id="comparisonResult"></div>`;
+
+    // Populate dropdowns
+    const cats = _categories.length ? _categories : await fetchCategories();
+    const selA = document.getElementById('compareA');
+    const selB = document.getElementById('compareB');
+    cats.forEach((c,i) => {
+      selA.innerHTML += `<option value="${esc(c.key)}">${c.emoji} ${esc(c.name)}</option>`;
+      selB.innerHTML += `<option value="${esc(c.key)}" ${i===1?'selected':''}>${c.emoji} ${esc(c.name)}</option>`;
+    });
+  }
+
+  async function fetchCategories() {
+    try {
+      const res = await apiFetch('/api/categories');
+      if (res.ok) { const d = await res.json(); _categories = d.categories; return _categories; }
+    } catch(e) {}
+    return [];
+  }
+
+  window.runComparison = async function() {
+    const keyA = document.getElementById('compareA').value;
+    const keyB = document.getElementById('compareB').value;
+    const $result = document.getElementById('comparisonResult');
+    $result.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading categories...</p></div>';
+
+    try {
+      const [resA, resB] = await Promise.all([
+        apiFetch(`/api/top?key=${encodeURIComponent(keyA)}`).then(r=>r.json()),
+        apiFetch(`/api/top?key=${encodeURIComponent(keyB)}`).then(r=>r.json())
+      ]);
+
+      const insA = computeInsights(resA.apps);
+      const insB = computeInsights(resB.apps);
+      if (!insA || !insB) { $result.innerHTML = '<div class="error">No data available</div>'; return; }
+
+      const labelA = _categories.find(c=>c.key===keyA)?.name || keyA;
+      const labelB = _categories.find(c=>c.key===keyB)?.name || keyB;
+
+      const rows = [
+        ['Total Apps', insA.total, insB.total],
+        ['Avg Rating', insA.avgRating.toFixed(2), insB.avgRating.toFixed(2)],
+        ['Below 4★', insA.pctBelow4+'%', insB.pctBelow4+'%'],
+        ['Unique Devs', insA.uniqueDevs, insB.uniqueDevs],
+        ['Free Apps', insA.freeCount, insB.freeCount],
+        ['Paid Apps', insA.paidCount, insB.paidCount],
+        ['Top Genre', insA.topGenres[0]?.name||'-', insB.topGenres[0]?.name||'-'],
+        ['Top Dev', insA.topDevs[0]?.name||'-', insB.topDevs[0]?.name||'-'],
+      ];
+
+      $result.innerHTML = `<div class="cat-compare-grid">
+        <table class="growth-table"><thead><tr><th>Metric</th><th>${esc(labelA)}</th><th>${esc(labelB)}</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td style="font-weight:500">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div>
+          <h4 style="margin:0 0 8px">${esc(labelA)} — Top Keywords</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">${insA.topKeywords.map(k=>`<span style="background:var(--card-bg);padding:4px 10px;border-radius:12px;font-size:13px">${esc(k.word)} <small style="color:var(--text-secondary)">(${k.count})</small></span>`).join('')}</div>
+        </div>
+        <div>
+          <h4 style="margin:0 0 8px">${esc(labelB)} — Top Keywords</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">${insB.topKeywords.map(k=>`<span style="background:var(--card-bg);padding:4px 10px;border-radius:12px;font-size:13px">${esc(k.word)} <small style="color:var(--text-secondary)">(${k.count})</small></span>`).join('')}</div>
+        </div>
+      </div>
+      ${renderClusters(resA.apps)}
+      ${renderClusters(resB.apps)}`;
+    } catch(err) {
+      $result.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
+    }
+  };
+
+  // ── Growth Velocity ─────────────────────────────────────────
+  async function loadGrowthData() {
+    try {
+      const res = await apiFetch('/api/growth');
+      if (!res.ok) return null;
+      return await res.json();
+    } catch(e) { return null; }
+  }
+
+  function renderGrowthSection(data) {
+    if (!data || !data.growth || !data.growth.length) {
+      return `<div class="insight-detail-box" style="grid-column:1/-1"><h4>📈 Growth Velocity</h4><p style="color:var(--text-secondary)">No snapshot data yet. Run the scheduler to collect data over time.</p></div>`;
+    }
+
+    let html = `<div class="insight-detail-box" style="grid-column:1/-1">
+      <h4>📈 Growth Velocity <small style="font-weight:400;color:var(--text-secondary)">(Based on snapshot comparisons)</small></h4>
+      <table class="growth-table"><thead><tr><th>#</th><th>App</th><th>Installs</th><th>Growth</th><th>Score</th><th>Status</th></tr></thead><tbody>`;
+
+    data.growth.slice(0,30).forEach((g,i) => {
+      const badge = g.isNew ? '<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">NEW</span>' :
+        `<span style="color:#22c55e;font-weight:600">+${(g.growth||0).toLocaleString()}</span>`;
+      html += `<tr>
+        <td>${i+1}</td>
+        <td style="font-weight:500">${esc(g.title||g.appId)}</td>
+        <td>${(g.installs||0).toLocaleString()}</td>
+        <td>${badge}</td>
+        <td>${g.score?'⭐ '+g.score.toFixed(1):'-'}</td>
+        <td>${g.isNew?'New Entry':'Growing'}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    return html;
+  }
+
+  // ── Notes UI in Detail Modal ────────────────────────────────
+  async function renderNoteSection(appId) {
+    let note = null;
+    try {
+      const res = await apiFetch(`/api/notes/${encodeURIComponent(appId)}`);
+      if (res.ok) { const d = await res.json(); note = d.note; }
+    } catch(e) {}
+
+    const noteText = note ? note.note_text : '';
+    const isBookmarked = note ? note.bookmarked : (_bookmarkedIds.has(appId)?1:0);
+
+    return `<div class="note-section">
+      <h4 style="margin:0 0 8px;display:flex;align-items:center;gap:8px">
+        📝 Notes
+        <button class="bookmark-star${isBookmarked?' bookmarked':''}" onclick="toggleDetailBookmark('${esc(appId)}')" id="detailBookmark" style="position:static;font-size:18px">${isBookmarked?'★':'☆'}</button>
+      </h4>
+      <textarea id="noteTextarea" placeholder="Add your research notes..." style="width:100%;min-height:80px;background:var(--bg-color);color:var(--text-primary);border:1px solid var(--border-color);border-radius:8px;padding:10px;font-family:inherit;font-size:14px;resize:vertical">${esc(noteText)}</textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="saveNote('${esc(appId)}')" style="background:var(--accent);color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-weight:600">Save Note</button>
+        ${note ? `<button onclick="deleteNote('${esc(appId)}')" style="background:var(--error);color:#fff;border:none;padding:6px 16px;border-radius:8px;cursor:pointer">Delete</button>` : ''}
+      </div>
+    </div>`;
+  }
+
+  window.saveNote = async function(appId) {
+    const text = document.getElementById('noteTextarea')?.value || '';
+    const bm = document.getElementById('detailBookmark')?.classList.contains('bookmarked') ? 1 : 0;
+    try {
+      await apiFetch(`/api/notes/${encodeURIComponent(appId)}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({note_text:text, bookmarked:bm})
+      });
+      if (bm) _bookmarkedIds.add(appId); else _bookmarkedIds.delete(appId);
+      showToast('Note saved ✓');
+    } catch(e) { showToast('Failed to save note'); }
+  };
+
+  window.deleteNote = async function(appId) {
+    try {
+      await apiFetch(`/api/notes/${encodeURIComponent(appId)}`, {method:'DELETE'});
+      _bookmarkedIds.delete(appId);
+      document.getElementById('noteTextarea').value = '';
+      showToast('Note deleted');
+    } catch(e) { showToast('Failed to delete note'); }
+  };
+
+  window.toggleDetailBookmark = function(appId) {
+    const btn = document.getElementById('detailBookmark');
+    if (!btn) return;
+    btn.classList.toggle('bookmarked');
+    const now = btn.classList.contains('bookmarked');
+    btn.textContent = now ? '★' : '☆';
+  };
+
+  function showToast(msg) {
+    const existing = document.querySelector('.toast-msg');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-msg';
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--card-bg);color:var(--text-primary);padding:12px 20px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:10001;font-size:14px;animation:fadeIn .2s';
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 2500);
+  }
+
+  // Re-attach card clicks after filter changes
+  function _attachCardClicks() {
+    document.querySelectorAll('.card-link').forEach(el => {
+      el.onclick = () => openAppDetail(el.dataset.appid);
+    });
+  }
+
   // ── Analysis & Comparison ─────────────────────────────────
   let _cachedAllApps = [];  // cache for dropdown population
 
@@ -2767,7 +3601,15 @@
 
     $content.innerHTML = `
       <h2 class="section-title">📊 App Analysis & Comparison</h2>
-      <div class="analysis-panel">
+
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <button class="toolbar-btn" onclick="showAnalysisSection('compare')" id="analysisTabCompare" style="background:var(--accent);color:#fff">🔍 App Comparison</button>
+        <button class="toolbar-btn" onclick="showAnalysisSection('growth')" id="analysisTabGrowth">📈 Growth Velocity</button>
+        <button class="toolbar-btn" onclick="showAnalysisSection('catcompare')" id="analysisTabCatCompare">📊 Category Comparison</button>
+        <button class="toolbar-btn" onclick="showAnalysisSection('bookmarks')" id="analysisTabBookmarks">⭐ Bookmarks</button>
+      </div>
+
+      <div id="analysisSectionCompare" class="analysis-panel">
         <p style="font-size:.85rem;color:#9ca3af;margin-bottom:16px">
           Select two apps to compare their descriptions (word overlap) and view install growth from snapshots.
           You can also paste a package ID directly.
@@ -2789,16 +3631,143 @@
           <label>or Package ID
             <input id="cmpId2" placeholder="com.example.app2" />
           </label>
-          <button class="compare-btn" onclick="runComparison()">Compare</button>
+          <button class="compare-btn" onclick="runAppComparison()">Compare</button>
         </div>
         <div id="compareResults"></div>
       </div>
+
+      <div id="analysisSectionGrowth" class="analysis-panel" style="display:none">
+        <div id="growthContent"><div class="loading"><div class="spinner"></div> Loading growth data...</div></div>
+      </div>
+
+      <div id="analysisSectionCatCompare" class="analysis-panel" style="display:none">
+        <div id="catCompareContent"></div>
+      </div>
+
+      <div id="analysisSectionBookmarks" class="analysis-panel" style="display:none">
+        <div id="bookmarksContent"><div class="loading"><div class="spinner"></div> Loading bookmarks...</div></div>
+      </div>
     `;
+
+    // Preload growth data
+    loadGrowthData().then(data => {
+      const el = document.getElementById('growthContent');
+      if (el) el.innerHTML = renderGrowthSection(data);
+    });
+
+    // Preload bookmarks
+    loadBookmarksView();
+  }
+
+  window.showAnalysisSection = function(which) {
+    ['compare','growth','catcompare','bookmarks'].forEach(s => {
+      const el = document.getElementById('analysisSection' + s.charAt(0).toUpperCase() + s.slice(1));
+      const tab = document.getElementById('analysisTab' + s.charAt(0).toUpperCase() + s.slice(1));
+      if (el) el.style.display = s===which ? '' : 'none';
+      if (tab) { tab.style.background = s===which ? 'var(--accent)' : ''; tab.style.color = s===which ? '#fff' : ''; }
+    });
+
+    // Load category comparison on demand
+    if (which === 'catcompare') {
+      const el = document.getElementById('catCompareContent');
+      if (el && !el.dataset.loaded) {
+        el.dataset.loaded = '1';
+        renderCatCompareInline(el);
+      }
+    }
+  };
+
+  async function renderCatCompareInline(container) {
+    const cats = _categories.length ? _categories : await fetchCategories();
+    let catOpts = cats.map((c,i) => `<option value="${esc(c.key)}" ${i===0?'selected':''}>${c.emoji} ${esc(c.name)}</option>`).join('');
+
+    container.innerHTML = `
+      <p style="font-size:.85rem;color:#9ca3af;margin-bottom:16px">Compare stats between two categories side by side.</p>
+      <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
+        <div><label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px">Category A</label>
+          <select id="inlineCmpA" class="filter-control" style="min-width:200px">${catOpts}</select></div>
+        <div><label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px">Category B</label>
+          <select id="inlineCmpB" class="filter-control" style="min-width:200px">${catOpts.replace('selected','').replace(cats.length>1?`value="${esc(cats[1].key)}"`:'value=""', `value="${esc(cats.length>1?cats[1].key:cats[0].key)}" selected`)}</select></div>
+        <button onclick="runInlineCatCompare()" style="background:var(--accent);color:#fff;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-weight:600">Compare</button>
+      </div>
+      <div id="inlineCmpResult"></div>`;
+  }
+
+  window.runInlineCatCompare = async function() {
+    const keyA = document.getElementById('inlineCmpA').value;
+    const keyB = document.getElementById('inlineCmpB').value;
+    const $result = document.getElementById('inlineCmpResult');
+    $result.innerHTML = '<div class="loading"><div class="spinner"></div> Comparing...</div>';
+
+    try {
+      const [resA, resB] = await Promise.all([
+        apiFetch(`/api/top?key=${encodeURIComponent(keyA)}`).then(r=>r.json()),
+        apiFetch(`/api/top?key=${encodeURIComponent(keyB)}`).then(r=>r.json())
+      ]);
+
+      const insA = computeInsights(resA.apps);
+      const insB = computeInsights(resB.apps);
+      if (!insA || !insB) { $result.innerHTML = '<div class="error">No data available. Fetch both categories first.</div>'; return; }
+
+      const labelA = _categories.find(c=>c.key===keyA)?.name || keyA;
+      const labelB = _categories.find(c=>c.key===keyB)?.name || keyB;
+
+      const rows = [
+        ['Total Apps', insA.total, insB.total],
+        ['Avg Rating', insA.avgRating.toFixed(2), insB.avgRating.toFixed(2)],
+        ['Below 4★', insA.pctBelow4+'%', insB.pctBelow4+'%'],
+        ['Unique Devs', insA.uniqueDevs, insB.uniqueDevs],
+        ['Free Apps', insA.freeCount, insB.freeCount],
+        ['Paid Apps', insA.paidCount, insB.paidCount],
+        ['Top Genre', insA.topGenres[0]?.name||'-', insB.topGenres[0]?.name||'-'],
+        ['Top Dev', insA.topDevs[0]?.name||'-', insB.topDevs[0]?.name||'-'],
+      ];
+
+      $result.innerHTML = `<table class="growth-table"><thead><tr><th>Metric</th><th>${esc(labelA)}</th><th>${esc(labelB)}</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td style="font-weight:500">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody></table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+          <div><h4 style="margin:0 0 8px">${esc(labelA)} — Keywords</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">${insA.topKeywords.map(k=>`<span style="background:var(--card-bg);padding:4px 10px;border-radius:12px;font-size:13px">${esc(k.word)} <small style="color:var(--text-secondary)">(${k.count})</small></span>`).join('')}</div></div>
+          <div><h4 style="margin:0 0 8px">${esc(labelB)} — Keywords</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">${insB.topKeywords.map(k=>`<span style="background:var(--card-bg);padding:4px 10px;border-radius:12px;font-size:13px">${esc(k.word)} <small style="color:var(--text-secondary)">(${k.count})</small></span>`).join('')}</div></div>
+        </div>`;
+    } catch(err) {
+      $result.innerHTML = `<div class="error">⚠️ ${esc(err.message)}</div>`;
+    }
+  };
+
+  async function loadBookmarksView() {
+    const el = document.getElementById('bookmarksContent');
+    if (!el) return;
+    try {
+      const res = await apiFetch('/api/bookmarks');
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
+      const bookmarks = data.bookmarks || [];
+      if (!bookmarks.length) {
+        el.innerHTML = '<p style="color:var(--text-secondary);padding:20px">No bookmarked apps yet. Click the ☆ star on any app card to bookmark it.</p>';
+        return;
+      }
+      let html = `<h4 style="margin:0 0 12px">⭐ Bookmarked Apps (${bookmarks.length})</h4>
+        <table class="growth-table"><thead><tr><th>App ID</th><th>Note</th><th>Bookmarked</th><th>Actions</th></tr></thead><tbody>`;
+      bookmarks.forEach(b => {
+        html += `<tr>
+          <td style="cursor:pointer;color:var(--accent)" onclick="openAppDetail('${esc(b.app_id)}')">${esc(b.app_id)}</td>
+          <td>${esc((b.note_text||'').slice(0,60))}${(b.note_text||'').length>60?'…':''}</td>
+          <td>${b.created_at||'-'}</td>
+          <td><button onclick="deleteNote('${esc(b.app_id)}');this.closest('tr').remove()" style="background:var(--error);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px">Remove</button></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      el.innerHTML = html;
+    } catch(e) {
+      el.innerHTML = '<p style="color:var(--text-secondary)">Failed to load bookmarks.</p>';
+    }
   }
 
   let _chartInstance = null;
 
-  async function runComparison() {
+  window.runAppComparison = async function() {
     const id1 = document.getElementById("cmpId1").value.trim();
     const id2 = document.getElementById("cmpId2").value.trim();
     const $results = document.getElementById("compareResults");

@@ -15,6 +15,14 @@ A Flask-based dashboard that scrapes Google Play Store data to analyze top apps,
 - **Custom Niches** — Add custom keyword groups and analyze their competition
 - **📊 App Comparison** — Select two apps, compare description keywords (word overlap), and view install growth charts
 - **App Details Modal** — Click any app to see description, screenshots, downloads, ratings, release date
+- **📊 Market Insights Panel** — Auto-generated stats for any category: avg rating, install distribution, developer concentration, genre breakdown, title keyword extraction
+- **⚠️ Quality Gap Detection** — Identifies low-rated apps with high installs (opportunity signals)
+- **💰 Revenue Estimates** — Rough revenue estimates for paid apps based on price × installs
+- **🔗 App Clustering** — Groups apps by shared title keywords to reveal sub-niches
+- **🔍 Filter Bar** — Search, filter by rating/installs/free-paid across any category view
+- **⭐ Bookmarks & Notes** — Star any app, add research notes, view all bookmarks in the Analysis tab
+- **📈 Growth Velocity** — Track fastest-growing apps from snapshot data (powered by scheduler)
+- **📊 Category Comparison** — Side-by-side stats for any two categories (ratings, devs, keywords)
 - **CSV Export** — Download any category's data as a spreadsheet
 - **Snapshot & Diff** — Save snapshots over time, compare rankings to spot trends
 - **Background Scheduler** — Auto-refresh all categories on a loop (hourly by default) with `scheduler.py`
@@ -110,6 +118,11 @@ GooglePlayTop/
 | `/api/niche/custom/<name>` | DELETE | Delete a custom niche |
 | `/api/compare?app1=...&app2=...` | GET | Compare two apps' descriptions |
 | `/api/install-history/<package_id>` | GET | Install count history from snapshots |
+| `/api/notes/<app_id>` | GET | Get note/bookmark for an app |
+| `/api/notes/<app_id>` | POST | Save note/bookmark for an app |
+| `/api/notes/<app_id>` | DELETE | Delete note/bookmark |
+| `/api/bookmarks` | GET | List all bookmarked apps |
+| `/api/growth` | GET | Fastest-growing apps from snapshots |
 | `/api/export/<category>` | GET | Download category data as CSV |
 | `/api/snapshot/save` | POST | Save a snapshot of current data |
 | `/api/snapshot/<key>` | GET | Retrieve a saved snapshot |

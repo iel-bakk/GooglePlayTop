@@ -734,6 +734,7 @@ def serialize_app(app_dict):
         "rank": None,  # filled in by caller
         "title": app_dict.get("title", "N/A"),
         "developer": app_dict.get("developer", "N/A"),
+        "developerId": app_dict.get("developerId", ""),
         "appId": app_dict.get("appId", ""),
         "score": round(app_dict["score"], 2) if app_dict.get("score") else None,
         "installs": app_dict.get("installs", "N/A"),
@@ -743,6 +744,8 @@ def serialize_app(app_dict):
         "genre": app_dict.get("genre", ""),
         "free": app_dict.get("free", True),
         "price": app_dict.get("price", 0),
+        "containsAds": app_dict.get("containsAds") or app_dict.get("adSupported") or False,
+        "offersIAP": app_dict.get("offersIAP", False),
         "summary": (app_dict.get("summary") or "")[:200],
         "released": app_dict.get("released", ""),
         "description": app_dict.get("description", ""),

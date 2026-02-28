@@ -87,6 +87,16 @@ def init_db():
             created_at    TEXT    NOT NULL    -- ISO timestamp
         );
         CREATE INDEX IF NOT EXISTS idx_custom_cat_name ON custom_categories(category_name);
+
+        CREATE TABLE IF NOT EXISTS app_notes (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            app_id      TEXT    NOT NULL UNIQUE,
+            note_text   TEXT    NOT NULL DEFAULT '',
+            bookmarked  INTEGER NOT NULL DEFAULT 0,
+            created_at  TEXT    NOT NULL,
+            updated_at  TEXT    NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_app_notes_id ON app_notes(app_id);
     """)
     conn.commit()
     conn.close()
@@ -416,6 +426,74 @@ def delete_custom_category(category_name):
     cursor = conn.execute(
         "DELETE FROM custom_categories WHERE category_name = ?", (category_name,)
     )
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# App notes & bookmarks
+# ---------------------------------------------------------------------------
+
+def save_note(app_id, note_text="", bookmarked=0):
+    """Save or update a note/bookmark for an app."""
+    conn = _connect()
+    now = datetime.utcnow().isoformat()
+    conn.execute(
+        "INSERT INTO app_notes (app_id, note_text, bookmarked, created_at, updated_at) "
+        "VALUES (?, ?, ?, ?, ?) "
+        "ON CONFLICT(app_id) DO UPDATE SET note_text = excluded.note_text, "
+        "bookmarked = excluded.bookmarked, updated_at = excluded.updated_at",
+        (app_id, note_text, 1 if bookmarked else 0, now, now),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_note(app_id):
+    """Return note dict for an app, or None."""
+    conn = _connect()
+    row = conn.execute(
+        "SELECT app_id, note_text, bookmarked, created_at, updated_at "
+        "FROM app_notes WHERE app_id = ?", (app_id,)
+    ).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "appId": row["app_id"],
+        "note": row["note_text"],
+        "bookmarked": bool(row["bookmarked"]),
+        "createdAt": row["created_at"],
+        "updatedAt": row["updated_at"],
+    }
+
+
+def get_all_bookmarks():
+    """Return all bookmarked/noted apps."""
+    conn = _connect()
+    rows = conn.execute(
+        "SELECT app_id, note_text, bookmarked, created_at, updated_at "
+        "FROM app_notes WHERE bookmarked = 1 OR note_text != '' "
+        "ORDER BY updated_at DESC"
+    ).fetchall()
+    conn.close()
+    return [
+        {
+            "appId": r["app_id"],
+            "note": r["note_text"],
+            "bookmarked": bool(r["bookmarked"]),
+            "createdAt": r["created_at"],
+            "updatedAt": r["updated_at"],
+        }
+        for r in rows
+    ]
+
+
+def delete_note(app_id):
+    """Delete note for an app. Returns True if it existed."""
+    conn = _connect()
+    cursor = conn.execute("DELETE FROM app_notes WHERE app_id = ?", (app_id,))
     conn.commit()
     conn.close()
     return cursor.rowcount > 0

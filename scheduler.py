@@ -20,7 +20,7 @@ from scraper import (
     get_all_categories,
     IPBlockedError,
 )
-from database import CACHE_TTL_HOURS
+from database import CACHE_TTL_HOURS, save_snapshot
 
 
 # ── Config ────────────────────────────────────────────────────
@@ -60,8 +60,13 @@ def run_cycle():
         return done, errors
     try:
         print(f"\n[1/{total}] General Top 100")
-        fetch_general_top(count=COUNT, country=COUNTRY, lang=LANG)
+        apps = fetch_general_top(count=COUNT, country=COUNTRY, lang=LANG)
         done += 1
+        # Auto-save snapshot for growth tracking
+        summary = [{"appId": a.get("appId"), "title": a.get("title"),
+                     "realInstalls": a.get("realInstalls", 0),
+                     "score": a.get("score")} for a in apps]
+        save_snapshot("general_top", summary)
     except IPBlockedError as e:
         print(f"  ⚠ IP blocked – pausing 5 min: {e}")
         _safe_sleep(300)
@@ -76,8 +81,13 @@ def run_cycle():
             break
         try:
             print(f"\n[{i}/{total}] {cat_name}")
-            fetch_category_top(cat_name, count=COUNT, country=COUNTRY, lang=LANG)
+            apps = fetch_category_top(cat_name, count=COUNT, country=COUNTRY, lang=LANG)
             done += 1
+            # Auto-save snapshot for growth tracking
+            summary = [{"appId": a.get("appId"), "title": a.get("title"),
+                         "realInstalls": a.get("realInstalls", 0),
+                         "score": a.get("score")} for a in apps[:30]]
+            save_snapshot(f"cat_{cat_name}", summary)
         except IPBlockedError as e:
             print(f"  ⚠ IP blocked – pausing 5 min: {e}")
             _safe_sleep(300)

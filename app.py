@@ -34,6 +34,7 @@ from database import (
     get_cache_status, CACHE_TTL_HOURS,
     save_custom_niche, get_custom_niches, delete_custom_niche,
     save_custom_category, get_custom_categories, delete_custom_category,
+    save_note, get_note, get_all_bookmarks, delete_note,
 )
 
 app = Flask(__name__, static_folder="static")
@@ -355,6 +356,108 @@ def api_delete_custom_category(category_name):
     if delete_custom_category(category_name):
         return jsonify({"message": f"Category '{category_name}' deleted"})
     return jsonify({"error": f"Category '{category_name}' not found"}), 404
+
+
+# ---------------------------------------------------------------------------
+# Notes & bookmarks
+# ---------------------------------------------------------------------------
+
+@app.route("/api/notes/<path:app_id>", methods=["GET"])
+def api_get_note(app_id):
+    """Get note for an app."""
+    note = get_note(app_id)
+    if not note:
+        return jsonify({"appId": app_id, "note": "", "bookmarked": False})
+    return jsonify(note)
+
+
+@app.route("/api/notes/<path:app_id>", methods=["POST"])
+def api_save_note(app_id):
+    """Save or update a note/bookmark for an app."""
+    data = request.get_json(force=True)
+    note_text = (data.get("note") or "").strip()
+    bookmarked = bool(data.get("bookmarked", False))
+    save_note(app_id, note_text, bookmarked)
+    return jsonify({"message": "Saved", "appId": app_id})
+
+
+@app.route("/api/notes/<path:app_id>", methods=["DELETE"])
+def api_delete_note(app_id):
+    """Delete note for an app."""
+    delete_note(app_id)
+    return jsonify({"message": "Deleted", "appId": app_id})
+
+
+@app.route("/api/bookmarks")
+def api_bookmarks():
+    """Return all bookmarked/noted apps."""
+    return jsonify({"bookmarks": get_all_bookmarks()})
+
+
+# ---------------------------------------------------------------------------
+# Growth velocity
+# ---------------------------------------------------------------------------
+
+@app.route("/api/growth")
+def api_growth():
+    """Return growth data across all categories by comparing recent snapshots."""
+    from database import _connect
+    import json as _json
+
+    conn = _connect()
+    # Get distinct snap_keys
+    keys = [r["snap_key"] for r in conn.execute(
+        "SELECT DISTINCT snap_key FROM snapshots"
+    ).fetchall()]
+
+    growth_data = []
+    for key in keys:
+        snaps = conn.execute(
+            "SELECT snap_data, taken_at FROM snapshots WHERE snap_key = ? "
+            "ORDER BY taken_at DESC LIMIT 2", (key,)
+        ).fetchall()
+        if len(snaps) < 2:
+            continue
+        current = {a["appId"]: a for a in _json.loads(snaps[0]["snap_data"])}
+        previous = {a["appId"]: a for a in _json.loads(snaps[1]["snap_data"])}
+
+        # Find fastest growers
+        for aid in current:
+            if aid in previous:
+                cur_inst = current[aid].get("realInstalls", 0)
+                prev_inst = previous[aid].get("realInstalls", 0)
+                if cur_inst > prev_inst and prev_inst > 0:
+                    growth_data.append({
+                        "appId": aid,
+                        "title": current[aid].get("title", ""),
+                        "category": key.replace("cat_", "").replace("general_top", "All"),
+                        "previousInstalls": prev_inst,
+                        "currentInstalls": cur_inst,
+                        "growth": cur_inst - prev_inst,
+                        "growthPct": round((cur_inst - prev_inst) / prev_inst * 100, 1),
+                        "snapshotDate": snaps[0]["taken_at"],
+                    })
+
+        # New entries (apps that appeared in latest but not previous)
+        for aid in current:
+            if aid not in previous:
+                growth_data.append({
+                    "appId": aid,
+                    "title": current[aid].get("title", ""),
+                    "category": key.replace("cat_", "").replace("general_top", "All"),
+                    "previousInstalls": 0,
+                    "currentInstalls": current[aid].get("realInstalls", 0),
+                    "growth": current[aid].get("realInstalls", 0),
+                    "growthPct": None,
+                    "snapshotDate": snaps[0]["taken_at"],
+                    "isNew": True,
+                })
+
+    conn.close()
+
+    # Sort by absolute growth
+    growth_data.sort(key=lambda x: x.get("growth", 0), reverse=True)
+    return jsonify({"growth": growth_data[:100]})
 
 
 @app.route("/api/niche/<niche_name>/keywords")
