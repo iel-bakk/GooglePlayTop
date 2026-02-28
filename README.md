@@ -8,16 +8,20 @@ A Flask-based dashboard that scrapes Google Play Store data to analyze top apps,
 
 ## Features
 
-- **Top 100 Apps** — Browse the most-downloaded apps across 15+ categories
+- **Top 100 Apps** — Browse the most-downloaded apps across 36+ built-in categories
 - **🎌 Anime Tab** — Top anime keywords and apps on Google Play
-- **🔍 Competition Analyzer** — Scores keywords (0-100) based on demand, competition & opportunity
+- **🔍 Competition Analyzer** — Scores keywords (0-100) based on demand, competition & opportunity to gauge how strong the competition is
+- **Custom Categories** — Create your own categories with custom search queries and emoji, managed via the UI
+- **Custom Niches** — Add custom keyword groups and analyze their competition
 - **📊 App Comparison** — Select two apps, compare description keywords (word overlap), and view install growth charts
 - **App Details Modal** — Click any app to see description, screenshots, downloads, ratings, release date
 - **CSV Export** — Download any category's data as a spreadsheet
 - **Snapshot & Diff** — Save snapshots over time, compare rankings to spot trends
+- **Background Scheduler** — Auto-refresh all categories on a loop (hourly by default) with `scheduler.py`
+- **Server-side Cancellation** — Switching tabs cancels the previous in-flight scrape instantly
 - **IP Block Detection** — Modal warning with countdown when Google rate-limits you
 - **Proxy Rotation** — Route requests through multiple proxies (configured via `.env`)
-- **Human-like Scraping** — Rotating browser headers, log-normal delays, shuffled queries, exponential backoff
+- **Human-like Scraping** — Rotating browser headers, random delays, shuffled queries, exponential backoff
 
 ---
 
@@ -58,6 +62,16 @@ python3 app.py
 
 Open **http://localhost:5000** in your browser.
 
+### 5. (Optional) Run the background scheduler
+
+To auto-refresh all categories every hour without using the web UI:
+
+```bash
+python3 scheduler.py
+```
+
+The scheduler writes directly to the SQLite database. You can run it alongside `app.py` (data loads instantly from cache) or on its own.
+
 ---
 
 ## Project Structure
@@ -67,6 +81,7 @@ GooglePlayTop/
 ├── app.py             # Flask server — all API routes
 ├── scraper.py         # Google Play scraper with throttling & proxy support
 ├── database.py        # SQLite persistence layer (caching, snapshots, query log)
+├── scheduler.py       # Background scheduler — auto-refreshes all categories
 ├── static/
 │   └── index.html     # Single-page frontend (vanilla JS, CSS, Chart.js)
 ├── .env               # Proxy config (not tracked by git)
@@ -81,15 +96,18 @@ GooglePlayTop/
 | Endpoint | Method | Description |
 |---|---|---|
 | `/api/top` | GET | Top 100 most-downloaded apps |
-| `/api/categories` | GET | List of available categories |
+| `/api/categories` | GET | List of available categories (built-in + custom) |
 | `/api/category/<name>` | GET | Top 100 apps in a category |
+| `/api/category/custom` | POST | Add a custom category |
+| `/api/category/custom/<name>` | DELETE | Delete a custom category |
 | `/api/anime/keywords` | GET | Top anime search keywords |
 | `/api/anime/apps` | GET | Top anime apps |
 | `/api/app/<package_id>` | GET | Full details for a single app |
-| `/api/niches` | GET | List of available niches |
+| `/api/niches` | GET | List of available niches (built-in + custom) |
 | `/api/niche/<name>/keywords` | GET | Keywords for a niche |
-| `/api/niche/<name>/score` | GET | Opportunity score for a niche |
-| `/api/niche/scores` | GET | All niche scores ranked |
+| `/api/niche/<name>/score` | GET | Competition score for a niche |
+| `/api/niche/custom` | POST | Add a custom niche |
+| `/api/niche/custom/<name>` | DELETE | Delete a custom niche |
 | `/api/compare?app1=...&app2=...` | GET | Compare two apps' descriptions |
 | `/api/install-history/<package_id>` | GET | Install count history from snapshots |
 | `/api/export/<category>` | GET | Download category data as CSV |
@@ -97,6 +115,9 @@ GooglePlayTop/
 | `/api/snapshot/<key>` | GET | Retrieve a saved snapshot |
 | `/api/snapshot/<key>/diff` | GET | Compare latest two snapshots |
 | `/api/proxy-status` | GET | Current proxy pool health |
+| `/api/throttle-status` | GET | Current throttle/cooldown state |
+| `/api/cache-status` | GET | Cache freshness for all categories |
+| `/api/eta` | GET | Estimated scraping duration |
 
 ---
 
