@@ -10,7 +10,7 @@ A Flask-based dashboard that scrapes Google Play Store data to analyze top apps,
 
 - **Top 100 Apps** — Browse the most-downloaded apps across 15+ categories
 - **🎌 Anime Tab** — Top anime keywords and apps on Google Play
-- **🔍 Niche Finder** — Scores niches (0-100) based on demand, competition & opportunity
+- **🔍 Competition Analyzer** — Scores keywords (0-100) based on demand, competition & opportunity
 - **📊 App Comparison** — Select two apps, compare description keywords (word overlap), and view install growth charts
 - **App Details Modal** — Click any app to see description, screenshots, downloads, ratings, release date
 - **CSV Export** — Download any category's data as a spreadsheet

@@ -70,6 +70,23 @@ def init_db():
             recorded_at TEXT    NOT NULL    -- ISO timestamp
         );
         CREATE INDEX IF NOT EXISTS idx_timing_ep ON request_timing(endpoint);
+
+        CREATE TABLE IF NOT EXISTS custom_niches (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            niche_name  TEXT    NOT NULL UNIQUE,
+            keywords    TEXT    NOT NULL,   -- JSON array of keyword strings
+            created_at  TEXT    NOT NULL    -- ISO timestamp
+        );
+        CREATE INDEX IF NOT EXISTS idx_custom_niche_name ON custom_niches(niche_name);
+
+        CREATE TABLE IF NOT EXISTS custom_categories (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            category_name TEXT    NOT NULL UNIQUE,
+            queries       TEXT    NOT NULL,   -- JSON array of search query strings
+            emoji         TEXT    NOT NULL DEFAULT '📂',
+            created_at    TEXT    NOT NULL    -- ISO timestamp
+        );
+        CREATE INDEX IF NOT EXISTS idx_custom_cat_name ON custom_categories(category_name);
     """)
     conn.commit()
     conn.close()
@@ -322,6 +339,86 @@ def get_cache_status():
             "fresh": fresh,
         }
     return result
+
+
+# ---------------------------------------------------------------------------
+# Custom niches
+# ---------------------------------------------------------------------------
+
+def save_custom_niche(niche_name, keywords):
+    """Save a custom niche with its keyword seeds. Overwrites if exists."""
+    conn = _connect()
+    now = datetime.utcnow().isoformat()
+    conn.execute(
+        "INSERT INTO custom_niches (niche_name, keywords, created_at) "
+        "VALUES (?, ?, ?) "
+        "ON CONFLICT(niche_name) DO UPDATE SET keywords = excluded.keywords",
+        (niche_name, json.dumps(keywords), now),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_custom_niches():
+    """Return all custom niches as a dict: { name: [keywords] }."""
+    conn = _connect()
+    rows = conn.execute("SELECT niche_name, keywords FROM custom_niches").fetchall()
+    conn.close()
+    return {r["niche_name"]: json.loads(r["keywords"]) for r in rows}
+
+
+def delete_custom_niche(niche_name):
+    """Delete a custom niche by name. Returns True if it existed."""
+    conn = _connect()
+    cursor = conn.execute(
+        "DELETE FROM custom_niches WHERE niche_name = ?", (niche_name,)
+    )
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# Custom categories
+# ---------------------------------------------------------------------------
+
+def save_custom_category(category_name, queries, emoji="📂"):
+    """Save a custom category (list of search queries). Overwrites if exists."""
+    conn = _connect()
+    now = datetime.utcnow().isoformat()
+    conn.execute(
+        "INSERT INTO custom_categories (category_name, queries, emoji, created_at) "
+        "VALUES (?, ?, ?, ?) "
+        "ON CONFLICT(category_name) DO UPDATE SET queries = excluded.queries, emoji = excluded.emoji",
+        (category_name, json.dumps(queries), emoji, now),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_custom_categories():
+    """Return all custom categories as a list of dicts.
+    Each dict: { name, queries: [...], emoji }"""
+    conn = _connect()
+    rows = conn.execute(
+        "SELECT category_name, queries, emoji FROM custom_categories"
+    ).fetchall()
+    conn.close()
+    return [
+        {"name": r["category_name"], "queries": json.loads(r["queries"]), "emoji": r["emoji"]}
+        for r in rows
+    ]
+
+
+def delete_custom_category(category_name):
+    """Delete a custom category by name. Returns True if it existed."""
+    conn = _connect()
+    cursor = conn.execute(
+        "DELETE FROM custom_categories WHERE category_name = ?", (category_name,)
+    )
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
 
 
 # ---------------------------------------------------------------------------

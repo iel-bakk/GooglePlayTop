@@ -4,84 +4,150 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Google Play – Top 100 Apps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
+    /* ── Design Tokens ────────────────────────────────────── */
+    :root {
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --bg-body:     #0c0e14;
+      --bg-surface:  #13151f;
+      --bg-card:     #181b27;
+      --bg-hover:    #1e2233;
+      --bg-elevated: #1f2235;
+      --border:      #262a3a;
+      --border-subtle: #1e2130;
+      --accent:      #7c3aed;
+      --accent-soft: #a78bfa;
+      --accent-muted: rgba(124,58,237,.12);
+      --text:        #e8eaed;
+      --text-secondary: #9ca3af;
+      --text-muted:  #6b7280;
+      --green:       #34d399;
+      --red:         #f87171;
+      --yellow:      #fbbf24;
+      --radius-sm:   8px;
+      --radius-md:   12px;
+      --radius-lg:   16px;
+      --radius-pill: 999px;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.25);
+      --shadow-md:   0 4px 16px rgba(0,0,0,.35);
+      --shadow-lg:   0 8px 32px rgba(0,0,0,.45);
+      --transition:  .2s cubic-bezier(.4,0,.2,1);
+    }
+
     /* ── Reset & Base ─────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-      background: #0f1117;
-      color: #e0e0e0;
+      font-family: var(--font);
+      background: var(--bg-body);
+      color: var(--text);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+    ::selection {
+      background: rgba(124,58,237,.35);
+      color: #fff;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a3e52; }
 
     /* ── Header ───────────────────────────────────────────── */
     header {
-      background: linear-gradient(135deg, #1a1c2e 0%, #2d1f4e 100%);
-      padding: 28px 32px 18px;
+      background: linear-gradient(135deg, #12142a 0%, #1e1640 50%, #1a1235 100%);
+      padding: 32px 32px 20px;
       text-align: center;
-      border-bottom: 2px solid #7c3aed;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
     }
     header h1 {
-      font-size: 1.8rem;
-      color: #a78bfa;
-      letter-spacing: .5px;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.3px;
     }
+    header h1 span, header h1::first-letter { color: var(--accent-soft); }
     header p {
       margin-top: 6px;
-      font-size: .9rem;
-      color: #9ca3af;
+      font-size: .85rem;
+      color: var(--text-secondary);
+      font-weight: 400;
     }
 
     /* ── Tab Bar ───────────────────────────────────────────── */
     .tabs {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 6px;
       flex-wrap: wrap;
-      padding: 16px 24px;
-      background: #13151f;
+      padding: 14px 24px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
     }
     .tab-btn {
-      padding: 8px 20px;
-      border: 1px solid #374151;
-      border-radius: 999px;
+      padding: 7px 18px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
       background: transparent;
-      color: #9ca3af;
-      font-size: .85rem;
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: .8rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all .2s;
+      transition: all var(--transition);
+      letter-spacing: .01em;
     }
-    .tab-btn:hover { border-color: #7c3aed; color: #c4b5fd; }
+    .tab-btn:hover {
+      background: var(--accent-muted);
+      color: var(--accent-soft);
+    }
     .tab-btn.active {
-      background: #7c3aed;
+      background: var(--accent);
       color: #fff;
-      border-color: #7c3aed;
+      border-color: var(--accent);
+      box-shadow: 0 2px 12px rgba(124,58,237,.35);
     }
 
     /* ── Main ──────────────────────────────────────────────── */
-    main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    main { max-width: 1120px; margin: 0 auto; padding: 28px 24px; }
 
     .section-title {
-      font-size: 1.3rem;
-      color: #c4b5fd;
-      margin-bottom: 16px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 18px;
+      letter-spacing: -.2px;
     }
 
     /* ── Loading / Error ───────────────────────────────────── */
     .loading, .error {
       text-align: center;
       padding: 60px 20px;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      font-weight: 500;
     }
-    .loading { color: #7c3aed; }
-    .error   { color: #ef4444; }
+    .loading { color: var(--accent-soft); }
+    .error   { color: var(--red); }
     .spinner {
-      width: 40px; height: 40px;
-      border: 4px solid #1e1e2e;
-      border-top-color: #7c3aed;
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin .8s linear infinite;
+      animation: spin .7s linear infinite;
       margin: 0 auto 16px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -89,54 +155,56 @@
     /* ── Card Grid ─────────────────────────────────────────── */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 10px;
     }
 
     .card {
       display: flex;
       align-items: center;
       gap: 14px;
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: 14px 16px;
-      transition: border-color .2s, transform .15s;
+      transition: all var(--transition);
     }
     .card:hover {
-      border-color: #7c3aed;
-      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      box-shadow: 0 4px 20px rgba(124,58,237,.1);
+      transform: translateY(-1px);
     }
 
     .rank {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
-      color: #7c3aed;
-      min-width: 30px;
+      color: var(--accent);
+      min-width: 32px;
       text-align: center;
     }
-    .rank.top3 { color: #facc15; font-size: 1.3rem; }
+    .rank.top3 { color: #facc15; font-size: 1.15rem; }
 
     .icon {
-      width: 52px; height: 52px;
-      border-radius: 12px;
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
       object-fit: cover;
       flex-shrink: 0;
-      background: #272a3a;
+      background: var(--border);
     }
 
     .info { flex: 1; min-width: 0; }
     .info .name {
-      font-size: .95rem;
+      font-size: .88rem;
       font-weight: 600;
-      color: #e5e7eb;
+      color: var(--text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .info .dev {
-      font-size: .78rem;
-      color: #9ca3af;
+      font-size: .75rem;
+      color: var(--text-secondary);
       margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
@@ -148,18 +216,18 @@
       flex-shrink: 0;
     }
     .meta .installs {
-      font-size: .8rem;
-      color: #a78bfa;
+      font-size: .78rem;
+      color: var(--accent-soft);
       font-weight: 600;
     }
     .meta .rating {
-      font-size: .78rem;
+      font-size: .75rem;
       color: #facc15;
       margin-top: 4px;
     }
     .meta .genre {
-      font-size: .7rem;
-      color: #6b7280;
+      font-size: .68rem;
+      color: var(--text-muted);
       margin-top: 2px;
     }
 
@@ -172,43 +240,45 @@
     .keywords-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
     }
     .kw-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 999px;
-      padding: 8px 18px;
-      font-size: .85rem;
-      color: #c4b5fd;
-      transition: border-color .2s, transform .15s;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 7px 16px;
+      font-size: .82rem;
+      color: var(--accent-soft);
+      transition: all var(--transition);
     }
     .kw-pill:hover {
-      border-color: #7c3aed;
-      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      transform: translateY(-1px);
     }
     .kw-rank {
       font-weight: 700;
-      color: #7c3aed;
-      font-size: .8rem;
+      color: var(--accent);
+      font-size: .75rem;
     }
     .kw-name {
       font-weight: 500;
     }
     .kw-count {
-      font-size: .72rem;
-      color: #6b7280;
+      font-size: .7rem;
+      color: var(--text-muted);
     }
 
     /* ── Footer ────────────────────────────────────────────── */
     footer {
       text-align: center;
-      padding: 24px;
-      font-size: .75rem;
-      color: #4b5563;
+      padding: 28px 24px;
+      font-size: .72rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
     }
 
     /* ── Responsive ─────────────────────────────────────────── */
@@ -218,6 +288,8 @@
       .modal-body { padding: 20px; max-width: 100%; }
       .detail-screenshots { gap: 8px; }
       .detail-screenshots img { height: 160px; }
+      .tabs { gap: 4px; padding: 10px 12px; }
+      .tab-btn { padding: 6px 12px; font-size: .75rem; }
     }
 
     /* ── Detail Modal ──────────────────────────────────────── */
@@ -226,8 +298,9 @@
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background: rgba(0, 0, 0, .75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, .7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       justify-content: center;
       align-items: flex-start;
       padding: 40px 16px;
@@ -236,17 +309,18 @@
     .modal-overlay.open { display: flex; }
 
     .modal-body {
-      background: #1a1c2e;
-      border: 1px solid #374151;
-      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       max-width: 720px;
       width: 100%;
       padding: 28px 32px;
       position: relative;
       animation: slideUp .25s ease;
+      box-shadow: var(--shadow-lg);
     }
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
@@ -254,77 +328,162 @@
       position: absolute;
       top: 14px; right: 18px;
       background: none; border: none;
-      color: #9ca3af;
+      color: var(--text-secondary);
       font-size: 1.5rem;
       cursor: pointer;
-      transition: color .2s;
+      transition: color var(--transition);
     }
     .modal-close:hover { color: #fff; }
+
+    /* ── Proxy Status ───────────────────────────────────────── */
+    .proxy-status-btn {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(19, 21, 31, .6);
+      backdrop-filter: blur(8px);
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: .75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .proxy-status-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent-soft);
+      background: rgba(124,58,237,.08);
+    }
+    header { position: relative; }
+    .proxy-list {
+      list-style: none;
+      padding: 0;
+      margin: 12px 0 0;
+    }
+    .proxy-list li {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      font-size: .82rem;
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .proxy-list li.alive {
+      background: rgba(6,95,70,.4);
+      color: var(--green);
+      border: 1px solid rgba(52,211,153,.15);
+    }
+    .proxy-list li.dead {
+      background: rgba(127,29,29,.4);
+      color: var(--red);
+      border: 1px solid rgba(248,113,113,.15);
+    }
+    .proxy-list li.direct {
+      background: rgba(30,41,59,.6);
+      color: #94a3b8;
+      border: 1px solid var(--border);
+    }
+    .proxy-stat {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .proxy-stat-card {
+      flex: 1;
+      background: var(--bg-body);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+    }
+    .proxy-stat-card .psc-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    .proxy-stat-card .psc-label {
+      font-size: .72rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
 
     .detail-header {
       display: flex;
       gap: 18px;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .detail-header img {
-      width: 72px; height: 72px;
-      border-radius: 16px;
+      width: 68px; height: 68px;
+      border-radius: var(--radius-md);
       object-fit: cover;
-      background: #272a3a;
+      background: var(--border);
     }
     .detail-header .detail-title {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      color: #e5e7eb;
+      color: #fff;
+      letter-spacing: -.2px;
     }
     .detail-header .detail-dev {
-      font-size: .85rem;
-      color: #9ca3af;
+      font-size: .82rem;
+      color: var(--text-secondary);
       margin-top: 2px;
     }
     .detail-header .detail-genre-badge {
       display: inline-block;
       margin-top: 6px;
       padding: 3px 10px;
-      border-radius: 999px;
-      background: #272a3a;
-      font-size: .72rem;
-      color: #a78bfa;
+      border-radius: var(--radius-pill);
+      background: var(--accent-muted);
+      border: 1px solid rgba(124,58,237,.2);
+      font-size: .7rem;
+      font-weight: 500;
+      color: var(--accent-soft);
     }
 
     .detail-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
       margin-bottom: 22px;
     }
     .stat-card {
-      background: #13151f;
-      border-radius: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
       padding: 14px;
       text-align: center;
     }
     .stat-card .stat-value {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: #c4b5fd;
+      color: var(--accent-soft);
     }
     .stat-card .stat-label {
-      font-size: .72rem;
-      color: #6b7280;
+      font-size: .68rem;
+      color: var(--text-muted);
       margin-top: 4px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .04em;
     }
 
     .detail-description {
-      background: #13151f;
-      border-radius: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
       padding: 16px;
       margin-bottom: 18px;
       max-height: 260px;
       overflow-y: auto;
-      font-size: .85rem;
-      line-height: 1.6;
+      font-size: .84rem;
+      line-height: 1.65;
       color: #d1d5db;
       white-space: pre-line;
     }
@@ -338,7 +497,7 @@
     }
     .detail-screenshots img {
       height: 200px;
-      border-radius: 10px;
+      border-radius: var(--radius-sm);
       object-fit: cover;
       flex-shrink: 0;
     }
@@ -353,9 +512,9 @@
     .detail-footer a {
       display: inline-block;
       padding: 10px 24px;
-      background: #7c3aed;
+      background: var(--accent);
       color: #fff;
-      border-radius: 999px;
+      border-radius: var(--radius-pill);
       text-decoration: none;
       font-size: .85rem;
       font-weight: 600;
@@ -364,110 +523,298 @@
     .detail-footer a:hover { background: #6d28d9; }
     .detail-footer .detail-meta-info {
       font-size: .72rem;
-      color: #6b7280;
+      color: var(--text-muted);
     }
 
-    /* ── Niche Finder ──────────────────────────────────────── */
+    /* ── Competition Analyzer ───────────────────────────────── */
     .niche-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 14px;
+      gap: 10px;
       margin-bottom: 24px;
     }
     .niche-card {
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: 18px;
-      transition: border-color .2s, transform .15s;
+      transition: all var(--transition);
       cursor: pointer;
+      position: relative;
     }
     .niche-card:hover {
-      border-color: #7c3aed;
-      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      box-shadow: 0 4px 20px rgba(124,58,237,.1);
+      transform: translateY(-1px);
     }
     .niche-card .niche-name {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #e5e7eb;
-      margin-bottom: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 8px;
     }
     .niche-card .score-bar {
-      height: 8px;
-      border-radius: 4px;
-      background: #272a3a;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
       margin-bottom: 10px;
       overflow: hidden;
     }
     .niche-card .score-bar-fill {
       height: 100%;
-      border-radius: 4px;
+      border-radius: 3px;
       transition: width .5s;
     }
     .niche-metrics {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
+      gap: 5px;
     }
     .niche-metric {
-      font-size: .75rem;
-      color: #9ca3af;
+      font-size: .73rem;
+      color: var(--text-secondary);
     }
     .niche-metric strong {
-      color: #c4b5fd;
+      color: var(--accent-soft);
     }
     .opportunity-badge {
       display: inline-block;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: .78rem;
+      padding: 3px 12px;
+      border-radius: var(--radius-pill);
+      font-size: .75rem;
       font-weight: 700;
       margin-bottom: 8px;
+      letter-spacing: .02em;
     }
-    .opp-high   { background: #065f46; color: #34d399; }
-    .opp-medium { background: #713f12; color: #fbbf24; }
-    .opp-low    { background: #7f1d1d; color: #f87171; }
+    .opp-high   { background: rgba(6,95,70,.5); color: var(--green); border: 1px solid rgba(52,211,153,.2); }
+    .opp-medium { background: rgba(113,63,18,.5); color: var(--yellow); border: 1px solid rgba(251,191,36,.2); }
+    .opp-low    { background: rgba(127,29,29,.5); color: var(--red); border: 1px solid rgba(248,113,113,.2); }
+
+    .niche-add-form {
+      background: var(--bg-card);
+      border: 1px dashed rgba(124,58,237,.4);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .niche-add-form h3 {
+      margin: 0 0 14px;
+      font-size: .95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .niche-add-form input,
+    .niche-add-form textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-body);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .85rem;
+      margin-bottom: 10px;
+      transition: border-color var(--transition);
+    }
+    .niche-add-form input:focus,
+    .niche-add-form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+    }
+    .niche-add-form textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+    .niche-add-form .niche-form-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .niche-add-form button {
+      padding: 9px 22px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-family: var(--font);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .niche-add-form .btn-save {
+      background: var(--accent);
+      color: #fff;
+    }
+    .niche-add-form .btn-save:hover {
+      background: #6d28d9;
+      box-shadow: 0 2px 12px rgba(124,58,237,.3);
+    }
+    .niche-card .btn-delete {
+      background: none;
+      border: 1px solid rgba(127,29,29,.6);
+      color: var(--red);
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font);
+      font-size: .68rem;
+      font-weight: 500;
+      cursor: pointer;
+      float: right;
+      transition: all var(--transition);
+    }
+    .niche-card .btn-delete:hover {
+      background: rgba(127,29,29,.5);
+      color: #fff;
+    }
+
+    /* ── Add Category Modal ──────────────────────────────── */
+    .add-cat-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 2000;
+      align-items: center; justify-content: center;
+    }
+    .add-cat-overlay.open { display: flex; }
+    .add-cat-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 30px;
+      width: 440px;
+      max-width: 92vw;
+      box-shadow: 0 12px 40px rgba(0,0,0,.5);
+    }
+    .add-cat-box h3 {
+      margin: 0 0 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .add-cat-box input,
+    .add-cat-box textarea {
+      width: 100%; box-sizing: border-box;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-body);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .85rem;
+      margin-bottom: 10px;
+      transition: border-color var(--transition);
+    }
+    .add-cat-box input:focus,
+    .add-cat-box textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+    }
+    .add-cat-box textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+    .add-cat-box .form-row {
+      display: flex; gap: 10px; align-items: center; margin-bottom: 10px;
+    }
+    .add-cat-box .form-row input { margin-bottom: 0; }
+    .add-cat-box .emoji-input { width: 60px; text-align: center; font-size: 1.3rem; }
+    .add-cat-box .btn-row { display: flex; gap: 10px; margin-top: 6px; }
+    .add-cat-box button {
+      padding: 9px 22px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-family: var(--font);
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .add-cat-box .btn-save {
+      background: var(--accent); color: #fff;
+    }
+    .add-cat-box .btn-save:hover {
+      background: #6d28d9;
+      box-shadow: 0 2px 12px rgba(124,58,237,.3);
+    }
+    .add-cat-box .btn-cancel {
+      background: var(--bg-body); color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .add-cat-box .btn-cancel:hover {
+      background: var(--border); color: #fff;
+    }
+    .tab-btn.custom-cat { position: relative; }
+    .tab-btn.custom-cat .cat-del {
+      display: none;
+      position: absolute; top: -5px; right: -5px;
+      background: rgba(127,29,29,.8); color: #fff;
+      border: none; border-radius: 50%;
+      width: 16px; height: 16px;
+      font-size: .6rem; line-height: 16px;
+      text-align: center; cursor: pointer;
+      z-index: 10;
+    }
+    .tab-btn.custom-cat:hover .cat-del { display: block; }
+    .tab-btn.add-cat-btn {
+      border: 1px dashed var(--accent);
+      color: var(--accent);
+      background: transparent;
+      font-size: .8rem;
+    }
+    .tab-btn.add-cat-btn:hover {
+      background: rgba(124,58,237,.1);
+    }
+    .niche-card .niche-score-area {
+      min-height: 28px;
+      margin-top: 10px;
+    }
 
     /* ── Toolbar ────────────────────────────────────────────── */
     .toolbar {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
     .toolbar-btn {
-      padding: 6px 16px;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      background: #1a1c2e;
-      color: #9ca3af;
-      font-size: .78rem;
+      padding: 7px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: .75rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all .2s;
+      transition: all var(--transition);
     }
     .toolbar-btn:hover {
-      border-color: #7c3aed;
-      color: #c4b5fd;
+      border-color: var(--accent);
+      color: var(--accent-soft);
+      background: var(--bg-hover);
     }
 
     /* ── Snapshot diff ──────────────────────────────────────── */
-    .diff-section { margin-bottom: 20px; }
+    .diff-section { margin-bottom: 22px; }
     .diff-section h3 {
-      font-size: 1rem;
-      color: #c4b5fd;
+      font-size: .95rem;
+      font-weight: 600;
+      color: #fff;
       margin-bottom: 8px;
     }
     .diff-item {
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
       padding: 10px 14px;
       margin-bottom: 6px;
       font-size: .82rem;
     }
-    .diff-item .change-positive { color: #34d399; font-weight: 600; }
-    .diff-item .change-negative { color: #f87171; font-weight: 600; }
+    .diff-item .change-positive { color: var(--green); font-weight: 600; }
+    .diff-item .change-negative { color: var(--red); font-weight: 600; }
 
     /* ── IP Blocked Modal ────────────────────────────────── */
     .blocked-overlay {
@@ -542,13 +889,13 @@
       transform: translateX(0);
     }
     .throttle-box {
-      background: #1c1e30;
-      border: 2px solid #f59e0b;
-      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid rgba(245,158,11,.3);
+      border-radius: var(--radius-md);
       padding: 20px 24px;
       min-width: 280px;
-      max-width: 360px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+      max-width: 340px;
+      box-shadow: var(--shadow-lg);
     }
     .throttle-box .throttle-header {
       display: flex;
@@ -602,27 +949,29 @@
       color: #9ca3af;
     }
     .throttle-bar {
-      height: 4px;
-      background: #374151;
-      border-radius: 4px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 3px;
       overflow: hidden;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .throttle-bar .throttle-fill {
       height: 100%;
       background: #f59e0b;
-      border-radius: 4px;
+      border-radius: 3px;
       transition: width .95s linear;
     }
     .throttle-box .dismiss-link {
       display: block;
       text-align: right;
-      font-size: .75rem;
-      color: #6b7280;
+      font-size: .72rem;
+      color: var(--text-muted);
       cursor: pointer;
-      text-decoration: underline;
+      text-decoration: none;
+      opacity: .7;
+      transition: opacity var(--transition);
     }
-    .throttle-box .dismiss-link:hover { color: #9ca3af; }
+    .throttle-box .dismiss-link:hover { opacity: 1; }
 
     /* ── ETA timer ────────────────────────────────────────── */
     .eta-wrap {
@@ -633,26 +982,26 @@
       margin-top: 10px;
     }
     .eta-bar-outer {
-      width: 220px;
-      height: 6px;
-      background: #1e1e2e;
-      border-radius: 6px;
+      width: 240px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
       overflow: hidden;
     }
     .eta-bar-inner {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #7c3aed, #a78bfa);
-      border-radius: 6px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+      border-radius: 4px;
       transition: width 1s linear;
     }
     .eta-text {
-      font-size: .85rem;
-      color: #9ca3af;
+      font-size: .82rem;
+      color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
     }
     .eta-text span {
-      color: #c4b5fd;
+      color: var(--accent-soft);
       font-weight: 600;
     }
 
@@ -744,40 +1093,48 @@
       gap: 10px;
       flex-wrap: wrap;
       align-items: flex-end;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .compare-form label {
-      font-size: .78rem;
-      color: #9ca3af;
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
     .compare-form input, .compare-form select {
-      padding: 8px 12px;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      background: #1a1c2e;
-      color: #e0e0e0;
-      font-size: .85rem;
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: .84rem;
       min-width: 220px;
+      transition: border-color var(--transition);
     }
     .compare-form input:focus, .compare-form select:focus {
-      border-color: #7c3aed;
+      border-color: var(--accent);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(124,58,237,.12);
     }
     .compare-btn {
-      padding: 8px 20px;
-      background: #7c3aed;
+      padding: 9px 22px;
+      background: var(--accent);
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      font-size: .85rem;
+      font-family: var(--font);
+      font-size: .82rem;
       font-weight: 600;
-      transition: background .2s;
+      transition: all var(--transition);
     }
-    .compare-btn:hover { background: #6d28d9; }
+    .compare-btn:hover {
+      background: #6d28d9;
+      box-shadow: 0 2px 12px rgba(124,58,237,.3);
+    }
 
     .compare-result {
       display: grid;
@@ -789,9 +1146,9 @@
       .compare-result { grid-template-columns: 1fr; }
     }
     .compare-app-card {
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: 18px;
     }
     .compare-app-card .app-hdr {
@@ -801,50 +1158,51 @@
       margin-bottom: 12px;
     }
     .compare-app-card .app-hdr img {
-      width: 48px; height: 48px;
-      border-radius: 12px;
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
     }
     .compare-app-card .app-hdr .app-title {
       font-weight: 700;
-      color: #e5e7eb;
+      color: #fff;
     }
     .compare-app-card .app-hdr .app-dev {
-      font-size: .78rem;
-      color: #9ca3af;
+      font-size: .75rem;
+      color: var(--text-secondary);
     }
 
     .word-section {
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: 16px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
     .word-section h3 {
-      font-size: .95rem;
-      color: #c4b5fd;
+      font-size: .9rem;
+      font-weight: 600;
+      color: #fff;
       margin-bottom: 10px;
     }
     .word-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 5px;
     }
     .word-chip {
       display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: .75rem;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: .72rem;
       font-weight: 500;
     }
-    .word-chip.shared  { background: #1e3a5f; color: #60a5fa; }
-    .word-chip.only1   { background: #3b1f5e; color: #c084fc; }
-    .word-chip.only2   { background: #1e3b3b; color: #34d399; }
+    .word-chip.shared  { background: rgba(30,58,95,.6); color: #60a5fa; border: 1px solid rgba(96,165,250,.15); }
+    .word-chip.only1   { background: rgba(59,31,94,.6); color: #c084fc; border: 1px solid rgba(192,132,252,.15); }
+    .word-chip.only2   { background: rgba(30,59,59,.6); color: var(--green); border: 1px solid rgba(52,211,153,.15); }
 
     .chart-container {
-      background: #1a1c2e;
-      border: 1px solid #272a3a;
-      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: 18px;
       margin-bottom: 20px;
     }
@@ -854,11 +1212,12 @@
     .overlap-badge {
       display: inline-block;
       padding: 4px 14px;
-      border-radius: 999px;
-      font-size: .82rem;
+      border-radius: var(--radius-pill);
+      font-size: .8rem;
       font-weight: 700;
-      background: #272a3a;
-      color: #a78bfa;
+      background: var(--accent-muted);
+      border: 1px solid rgba(124,58,237,.2);
+      color: var(--accent-soft);
       margin-bottom: 14px;
     }
 
@@ -868,35 +1227,35 @@
       bottom: 24px;
       right: 24px;
       z-index: 10001;
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      border: 2px solid #374151;
-      background: #1a1c2e;
-      color: #a78bfa;
-      font-size: 1.3rem;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--accent-soft);
+      font-size: 1.2rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all .25s;
-      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+      transition: all var(--transition);
+      box-shadow: var(--shadow-md);
     }
     .sidebar-toggle:hover {
-      border-color: #7c3aed;
-      background: #272a3a;
-      transform: scale(1.08);
+      border-color: var(--accent);
+      background: var(--bg-hover);
+      transform: scale(1.06);
     }
     .sidebar-toggle .badge {
       position: absolute;
       top: -4px;
       right: -4px;
-      background: #7c3aed;
+      background: var(--accent);
       color: #fff;
-      font-size: .65rem;
+      font-size: .6rem;
       font-weight: 700;
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -904,17 +1263,17 @@
       pointer-events: none;
     }
     .sidebar-toggle .badge.has-error {
-      background: #ef4444;
+      background: var(--red);
     }
     .req-sidebar {
       position: fixed;
       top: 0;
       right: 0;
-      width: 370px;
+      width: 360px;
       height: 100vh;
       z-index: 10000;
-      background: #13151f;
-      border-left: 2px solid #272a3a;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border);
       transform: translateX(100%);
       transition: transform .3s ease;
       display: flex;
@@ -929,86 +1288,90 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 18px;
-      border-bottom: 1px solid #272a3a;
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
     .req-sidebar-header h3 {
-      font-size: 1rem;
-      color: #c4b5fd;
+      font-size: .92rem;
+      font-weight: 600;
+      color: #fff;
       display: flex;
       align-items: center;
       gap: 8px;
     }
     .req-sidebar-header .clear-btn {
       background: none;
-      border: 1px solid #374151;
-      color: #9ca3af;
-      font-size: .72rem;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: .7rem;
+      font-weight: 500;
       padding: 4px 10px;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all .2s;
+      transition: all var(--transition);
     }
     .req-sidebar-header .clear-btn:hover {
-      border-color: #ef4444;
-      color: #f87171;
+      border-color: rgba(248,113,113,.4);
+      color: var(--red);
     }
     .req-sidebar-header .close-sb {
       background: none;
       border: none;
-      color: #6b7280;
+      color: var(--text-muted);
       font-size: 1.3rem;
       cursor: pointer;
       margin-left: 8px;
+      transition: color var(--transition);
     }
-    .req-sidebar-header .close-sb:hover { color: #e0e0e0; }
+    .req-sidebar-header .close-sb:hover { color: var(--text); }
     .req-sidebar-list {
       flex: 1;
       overflow-y: auto;
-      padding: 8px 0;
+      padding: 6px 0;
     }
-    .req-sidebar-list::-webkit-scrollbar { width: 5px; }
-    .req-sidebar-list::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    .req-sidebar-list::-webkit-scrollbar { width: 4px; }
+    .req-sidebar-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
     .req-sidebar-empty {
       text-align: center;
-      color: #4b5563;
+      color: var(--text-muted);
       padding: 50px 20px;
-      font-size: .85rem;
+      font-size: .82rem;
     }
     .req-entry {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      padding: 10px 18px;
-      border-bottom: 1px solid #1e1e2e;
-      transition: background .15s;
+      padding: 9px 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition);
       cursor: default;
     }
     .req-entry:hover {
-      background: #1a1c2e;
+      background: var(--bg-hover);
     }
     .req-entry .req-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      margin-top: 5px;
+      margin-top: 6px;
       flex-shrink: 0;
     }
-    .req-entry .req-dot.ok      { background: #34d399; }
-    .req-entry .req-dot.fail    { background: #ef4444; }
-    .req-entry .req-dot.pending { background: #f59e0b; animation: pulse-dot 1s ease infinite; }
+    .req-entry .req-dot.ok      { background: var(--green); }
+    .req-entry .req-dot.fail    { background: var(--red); }
+    .req-entry .req-dot.pending { background: var(--yellow); animation: pulse-dot 1s ease infinite; }
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; }
-      50%      { opacity: .35; }
+      50%      { opacity: .3; }
     }
     .req-entry .req-body {
       flex: 1;
       min-width: 0;
     }
     .req-entry .req-url {
-      font-size: .78rem;
+      font-size: .75rem;
       color: #d1d5db;
-      font-family: 'Courier New', monospace;
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1018,21 +1381,21 @@
       align-items: center;
       gap: 8px;
       margin-top: 3px;
-      font-size: .7rem;
-      color: #6b7280;
+      font-size: .68rem;
+      color: var(--text-muted);
     }
-    .req-entry .req-meta .status-ok   { color: #34d399; font-weight: 600; }
-    .req-entry .req-meta .status-fail { color: #ef4444; font-weight: 600; }
+    .req-entry .req-meta .status-ok   { color: var(--green); font-weight: 600; }
+    .req-entry .req-meta .status-fail { color: var(--red); font-weight: 600; }
     .req-entry .req-reason {
       margin-top: 4px;
-      font-size: .7rem;
-      color: #f87171;
+      font-size: .68rem;
+      color: var(--red);
       line-height: 1.3;
       word-break: break-word;
     }
     .req-entry .req-time {
-      font-size: .65rem;
-      color: #4b5563;
+      font-size: .62rem;
+      color: var(--text-muted);
       white-space: nowrap;
       margin-top: 5px;
       flex-shrink: 0;
@@ -1042,18 +1405,36 @@
 <body>
 
 <header>
-  <h1>📱 Google Play – Top 100 Apps</h1>
+  <h1>Google Play — Top 100 Apps</h1>
   <p>Most downloaded &amp; popular apps this week</p>
+  <button class="proxy-status-btn" id="proxyStatusBtn" onclick="openProxyStatus()" title="Proxy Status">🌐 Proxy Status</button>
 </header>
 
 <nav class="tabs" id="tabs">
   <button class="tab-btn active" data-endpoint="welcome">🏠 Home</button>
   <button class="tab-btn" data-endpoint="/api/top">All</button>
   <button class="tab-btn" data-endpoint="anime">🎌 Anime</button>
-  <button class="tab-btn" data-endpoint="niche-finder">🔍 Niche Finder</button>
+  <button class="tab-btn" data-endpoint="niche-finder">🔍 Competition Analyzer</button>
   <button class="tab-btn" data-endpoint="analysis">📊 Analysis</button>
   <!-- category buttons injected dynamically -->
 </nav>
+
+<!-- Add Category Modal -->
+<div class="add-cat-overlay" id="addCatOverlay">
+  <div class="add-cat-box">
+    <h3>➕ Add Custom Category</h3>
+    <div class="form-row">
+      <input type="text" id="catNameInput" placeholder="Category name (e.g. Pet Apps)" maxlength="40" style="flex:1">
+      <input type="text" id="catEmojiInput" class="emoji-input" placeholder="📂" maxlength="4">
+    </div>
+    <textarea id="catQueriesInput" placeholder="Search queries, one per line or comma-separated (e.g. pet care app, dog tracker, cat food...)"></textarea>
+    <div class="btn-row">
+      <button class="btn-save" onclick="addCustomCategory()">Add Category</button>
+      <button class="btn-cancel" onclick="closeAddCatModal()">Cancel</button>
+    </div>
+    <div id="catFormMsg" style="margin-top:8px;font-size:.8rem"></div>
+  </div>
+</div>
 
 <!-- IP blocked modal -->
 <div id="blockedOverlay" class="blocked-overlay">
@@ -1154,6 +1535,68 @@
   function closeBlockedModal() {
     $blockedOverlay.classList.remove("open");
     clearInterval(_blockedTimer);
+  }
+
+  // ── Proxy Status ──────────────────────────────────────────
+  async function openProxyStatus() {
+    const $modal = document.getElementById("modal");
+    const $modalContent = document.getElementById("modalContent");
+
+    $modalContent.innerHTML = `
+      <div class="loading" style="padding:40px 0">
+        <div class="spinner"></div>
+        Loading proxy status…
+      </div>`;
+    $modal.classList.add("open");
+
+    try {
+      const res = await fetch("/api/proxy-status");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      let html = `<h2 style="margin:0 0 6px;color:#a78bfa">🌐 Proxy Status</h2>`;
+      html += `<p style="color:#9ca3af;font-size:.85rem;margin-bottom:16px">${data.usingProxies ? 'Requests are routed through proxies' : 'No proxies configured — using direct connection'}</p>`;
+
+      // Stats cards
+      html += `<div class="proxy-stat">`;
+      html += `<div class="proxy-stat-card">
+        <div class="psc-value" style="color:#34d399">${data.alive}</div>
+        <div class="psc-label">Alive</div>
+      </div>`;
+      html += `<div class="proxy-stat-card">
+        <div class="psc-value" style="color:#f87171">${data.dead.length}</div>
+        <div class="psc-label">Dead</div>
+      </div>`;
+      html += `<div class="proxy-stat-card">
+        <div class="psc-value" style="color:#c4b5fd">${data.total}</div>
+        <div class="psc-label">Total</div>
+      </div>`;
+      html += `</div>`;
+
+      // Proxy list
+      if (data.total === 0) {
+        html += `<ul class="proxy-list"><li class="direct">⚡ Direct connection (no proxies in .env)</li></ul>`;
+      } else {
+        html += `<h3 style="margin:18px 0 8px;font-size:.9rem;color:#e5e7eb">Proxy Pool</h3>`;
+        html += `<ul class="proxy-list">`;
+        // We don't have the full proxy list from the API (only dead ones),
+        // so show alive count + dead list
+        const aliveCount = data.alive;
+        if (aliveCount > 0) {
+          html += `<li class="alive">✓ ${aliveCount} prox${aliveCount === 1 ? 'y' : 'ies'} active and healthy</li>`;
+        }
+        for (const p of data.dead) {
+          // Mask credentials in the URL for display
+          const masked = p.replace(/:\/\/([^:]+):([^@]+)@/, '://*****:*****@');
+          html += `<li class="dead">✕ ${masked}</li>`;
+        }
+        html += `</ul>`;
+      }
+
+      $modalContent.innerHTML = html;
+    } catch (err) {
+      $modalContent.innerHTML = `<div class="error">⚠️ Failed to load proxy status: ${err.message}</div>`;
+    }
   }
 
   // ── Request Log sidebar ────────────────────────────────────
@@ -1530,7 +1973,7 @@
   function _endpointToTimingKey(ep) {
     if (ep === "/api/top")  return "top";
     if (ep === "anime")     return "anime:apps";       // longest sub-request
-    if (ep === "niche-finder") return "niche_scores_all";
+    if (ep === "niche-finder") return "niche_finder";
     if (ep === "analysis")  return "top";               // loads /api/top
     const catMatch = ep.match(/\/api\/category\/(.+)/);
     if (catMatch) return "category:" + catMatch[1];
@@ -1566,9 +2009,6 @@
       return;
     }
 
-    // Enforce frontend cooldown
-    if (!checkTabCooldown()) return;
-
     // Cancel any in-flight request (user switched tabs fast)
     if (_activeController) _activeController.abort();
     _activeController = new AbortController();
@@ -1580,8 +2020,9 @@
     if (endpoint === "anime") {
       return loadAnime(signal).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
     }
-    if (endpoint === "niche-finder") {
-      return loadNicheFinder(signal).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
+    if (endpoint === "niche-finder" || endpoint.startsWith("niche-finder:")) {
+      const autoScoreNiche = endpoint.startsWith("niche-finder:") ? endpoint.slice("niche-finder:".length) : null;
+      return loadNicheFinder(signal, autoScoreNiche).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
     }
     if (endpoint === "analysis") {
       return loadAnalysis(signal).finally(() => { clearTimeout(pollTimer); _stopEtaCountdown(); });
@@ -1647,20 +2088,34 @@
   $tabs.addEventListener("click", (e) => {
     const btn = e.target.closest(".tab-btn");
     if (!btn) return;
+    const endpoint = btn.dataset.endpoint;
+    // Check cooldown BEFORE switching visual state (welcome is exempt)
+    if (endpoint !== "welcome" && !checkTabCooldown()) return;
     $tabs.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
-    loadEndpoint(btn.dataset.endpoint);
+    loadEndpoint(endpoint);
   });
 
   // ── Init: load categories, build welcome page ──────────
   const CATEGORY_ICONS = {
-    "All":            "📱", "Games": "🎮", "Social": "💬", "Entertainment": "🎬",
-    "Productivity":   "⚡", "Anime": "🎌", "Health": "❤️", "Finance": "💰",
-    "Education":      "📚", "AI":    "🤖", "Crypto": "₿",  "Shopping": "🛒",
-    "Food":           "🍔", "Travel":"✈️", "Music":  "🎵", "Photography": "📷",
+    "All":             "📱", "Games":          "🎮", "Social":          "💬",
+    "Entertainment":   "🎬", "Productivity":   "⚡", "Anime":           "🎌",
+    "Health":          "❤️", "Finance":         "💰", "Education":       "📚",
+    "AI":              "🤖", "Crypto":          "₿",  "Shopping":        "🛒",
+    "Food":            "🍔", "Travel":          "✈️", "Music":           "🎵",
+    "Photography":     "📷", "Art & Design":    "🎨", "Auto & Vehicles": "🚗",
+    "Beauty":          "💄", "Books & Reference":"📖","Business":        "💼",
+    "Comics":          "💬", "Communication":   "📞", "Dating":          "💕",
+    "Events":          "🎟️", "House & Home":    "🏠", "Libraries & Demo":"📚",
+    "Lifestyle":       "🌿", "Maps & Navigation":"🗺️","Medical":         "🏥",
+    "News & Magazines":"📰", "Parenting":       "👶", "Personalization": "🎨",
+    "Sports":          "⚽", "Tools":           "🔧", "Video Players":   "▶️",
+    "Weather":         "🌤️",
   };
 
   let _categories = [];
+  let _customCategoryMap = {};  // { name: emoji } for custom categories
+  let _customNiches = [];  // [{name, keywordCount, builtin}]
   let _cacheStatus = {};   // label -> {fetchedAt, ageMinutes, fresh}
   let _ttlHours = 6;
 
@@ -1714,16 +2169,28 @@
     const entries = [
       { name: "All (Top 100)", icon: "📱", endpoint: "/api/top",             cacheLabel: "All (Top 100)" },
       { name: "Anime",         icon: "🎌", endpoint: "anime",                cacheLabel: "Anime" },
-      { name: "Niche Finder",  icon: "🔍", endpoint: "niche-finder",         cacheLabel: null },
+      { name: "Competition Analyzer",  icon: "🔍", endpoint: "niche-finder",         cacheLabel: null },
       { name: "Analysis",      icon: "📊", endpoint: "analysis",             cacheLabel: null },
     ];
     for (const cat of _categories) {
       entries.push({
         name: cat,
-        icon: CATEGORY_ICONS[cat] || "📂",
+        icon: _customCategoryMap[cat] || CATEGORY_ICONS[cat] || "📂",
         endpoint: `/api/category/${cat}`,
         cacheLabel: cat,
+        isCustomCat: _customCategoryMap[cat] !== undefined,
       });
+    }
+    // Add custom (non-builtin) niches
+    for (const n of _customNiches) {
+      if (!n.builtin) {
+        entries.push({
+          name: `🔍 ${n.name}`,
+          icon: "🔍",
+          endpoint: `niche-finder:${n.name}`,
+          cacheLabel: null,
+        });
+      }
     }
 
     // Count how many are fresh
@@ -1773,6 +2240,8 @@
 
   /** Launch an endpoint from the welcome page (simulates tab click). */
   function _launchEndpoint(endpoint) {
+    // Check cooldown BEFORE switching visual state (welcome is exempt)
+    if (endpoint !== "welcome" && !checkTabCooldown()) return;
     // Highlight the matching tab if it exists
     const allBtns = $tabs.querySelectorAll(".tab-btn");
     allBtns.forEach(b => {
@@ -1785,18 +2254,20 @@
     // 1. Load category list
     try {
       const res = await fetch("/api/categories");
-      const { categories } = await res.json();
+      const { categories, customCategories } = await res.json();
       _categories = categories;
-      for (const cat of categories) {
-        const btn = document.createElement("button");
-        btn.className = "tab-btn";
-        btn.dataset.endpoint = `/api/category/${cat}`;
-        btn.textContent = cat;
-        $tabs.appendChild(btn);
-      }
+      _customCategoryMap = customCategories || {};
+      _rebuildCategoryTabs();
     } catch (_) {}
 
-    // 2. Load cache status (lightweight, no scraping)
+    // 2. Load niche list (lightweight, no scraping)
+    try {
+      const res = await fetch("/api/niches");
+      const data = await res.json();
+      _customNiches = data.niches || [];
+    } catch (_) {}
+
+    // 3. Load cache status (lightweight, no scraping)
     try {
       const res = await fetch("/api/cache-status");
       const data = await res.json();
@@ -1804,7 +2275,7 @@
       _ttlHours    = data.ttlHours || 6;
     } catch (_) {}
 
-    // 3. Show welcome page instead of auto-loading
+    // 4. Show welcome page instead of auto-loading
     _renderWelcome();
   })();
 
@@ -1819,7 +2290,10 @@
     if (e.target === $modal) $modal.classList.remove("open");
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") $modal.classList.remove("open");
+    if (e.key === "Escape") {
+      $modal.classList.remove("open");
+      closeAddCatModal();
+    }
   });
 
   // Open modal on card click
@@ -2001,45 +2475,254 @@
     return html;
   }
 
-  // ── Niche Finder ──────────────────────────────────────────
-  async function loadNicheFinder(signal) {
-    const eta = await _fetchEta("niche_scores_all");
-    showLoading(eta);
+  // ── Competition Analyzer ──────────────────────────────────
+  async function loadNicheFinder(signal, autoScoreNiche) {
+    showLoading(null);
     try {
-      const res = await apiFetch("/api/niche/scores", { signal });
+      const res = await apiFetch("/api/niches", { signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      $content.innerHTML = renderNicheScores(data.title, data.scores);
+      $content.innerHTML = renderNicheList(data.niches);
+      // Auto-score a specific niche if requested (e.g. from welcome page click)
+      if (autoScoreNiche) {
+        const safeId = autoScoreNiche.replace(/\s+/g, '_');
+        const card = document.getElementById(`niche-card-${safeId}`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        scoreNiche(autoScoreNiche);
+      }
     } catch (err) {
       if (err.name === "AbortError") return;
       showError(err.message);
     }
   }
 
-  function renderNicheScores(title, scores) {
-    let html = `<h2 class="section-title">${title}</h2>`;
+  function renderNicheList(niches) {
+    let html = `<h2 class="section-title">🔍 Competition Analyzer</h2>`;
+    html += `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:22px 24px;margin-bottom:24px">
+        <h3 style="font-size:.95rem;font-weight:600;color:#fff;margin-bottom:12px">How to use the Competition Analyzer</h3>
+        <div style="font-size:.84rem;line-height:1.65;color:var(--text-secondary)">
+          <p style="margin-bottom:10px">The Competition Analyzer helps you gauge <strong style="color:var(--accent-soft)">how strong the competition is</strong> for any keyword or niche on Google Play — so you know where opportunities exist and where the market is already saturated.</p>
+          <ol style="padding-left:18px;margin-bottom:12px">
+            <li style="margin-bottom:6px"><strong style="color:var(--text)">Click any keyword group</strong> below to compute its <em>Competition Score</em>. The tool will search Google Play for each keyword, analyse the top apps, and rate it from 0–100.</li>
+            <li style="margin-bottom:6px"><strong style="color:var(--text)">Add custom keywords</strong> using the form below — give them a name (e.g. "Pet Care") and at least 2 keywords (e.g. "pet tracker", "dog training app"). Then click to analyze the competition.</li>
+            <li style="margin-bottom:6px"><strong style="color:var(--text)">Read the score</strong>: <span style="color:var(--green)">55+ = Weak competition (opportunity!)</span> · <span style="color:var(--yellow)">35–54 = Moderate</span> · <span style="color:var(--red)">&lt; 35 = Strong competition (saturated)</span>.</li>
+          </ol>
+          <p style="margin-bottom:0"><strong style="color:var(--text)">What gets measured:</strong> Keyword demand (how many apps exist), Saturation (how many have 10M+ installs), Quality gap (apps rated below 4★), Freshness (apps released in the last year), and average installs.</p>
+        </div>
+      </div>`;
+
+    // Add custom niche form
+    html += `
+      <div class="niche-add-form" id="nicheAddForm">
+        <h3>➕ Add Custom Niche</h3>
+        <input type="text" id="nicheNameInput" placeholder="Niche name (e.g. Pet Care)" maxlength="50">
+        <textarea id="nicheKeywordsInput" placeholder="Keywords, one per line or comma-separated (e.g. pet care app, dog training, cat food...)"></textarea>
+        <div class="niche-form-actions">
+          <button class="btn-save" onclick="addCustomNiche()">Add Niche</button>
+        </div>
+        <div id="nicheFormMsg" style="margin-top:8px;font-size:.8rem"></div>
+      </div>`;
+
     html += `<div class="niche-grid">`;
-    for (const s of scores) {
-      const oppClass = s.opportunityScore >= 55 ? "opp-high" : s.opportunityScore >= 35 ? "opp-medium" : "opp-low";
-      const barColor = s.opportunityScore >= 55 ? "#34d399" : s.opportunityScore >= 35 ? "#fbbf24" : "#f87171";
+    for (const n of niches) {
+      const deleteBtn = !n.builtin
+        ? `<button class="btn-delete" onclick="event.stopPropagation();deleteNiche('${esc(n.name)}')">✕ Remove</button>`
+        : '';
       html += `
-        <div class="niche-card" onclick="openNicheDetail('${esc(s.niche)}')">
-          <div class="niche-name">${esc(s.niche)}</div>
-          <span class="opportunity-badge ${oppClass}">${s.opportunityScore}/100</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:${s.opportunityScore}%;background:${barColor}"></div></div>
-          <div class="niche-metrics">
-            <div class="niche-metric">Keywords: <strong>${s.keywordCount}</strong></div>
-            <div class="niche-metric">Avg Results: <strong>${s.avgResultsPerKeyword}</strong></div>
-            <div class="niche-metric">Saturation: <strong>${s.saturationPct}%</strong></div>
-            <div class="niche-metric">Gap (< 4★): <strong>${s.gapPct}%</strong></div>
-            <div class="niche-metric">Fresh Apps: <strong>${s.freshnessPct}%</strong></div>
-            <div class="niche-metric">Avg Installs: <strong>${formatNumber(s.avgInstalls)}</strong></div>
+        <div class="niche-card" id="niche-card-${esc(n.name).replace(/\s+/g, '_')}" onclick="scoreNiche('${esc(n.name)}')">
+          ${deleteBtn}
+          <div class="niche-name">${esc(n.name)}</div>
+          <div style="font-size:.8rem;color:#9ca3af">${n.keywordCount} keywords${n.builtin ? '' : ' · custom'}</div>
+          <div class="niche-score-area" id="niche-score-${esc(n.name).replace(/\s+/g, '_')}">
+            <span style="font-size:.75rem;color:#6b7280">Click to score →</span>
           </div>
         </div>`;
     }
     html += `</div>`;
     return html;
+  }
+
+  async function addCustomNiche() {
+    const nameInput = document.getElementById("nicheNameInput");
+    const kwInput = document.getElementById("nicheKeywordsInput");
+    const msgEl = document.getElementById("nicheFormMsg");
+    const name = nameInput.value.trim();
+    const rawKw = kwInput.value.trim();
+
+    if (!name) { msgEl.innerHTML = `<span style="color:#f87171">Enter a niche name</span>`; return; }
+    if (!rawKw) { msgEl.innerHTML = `<span style="color:#f87171">Enter at least 2 keywords</span>`; return; }
+
+    // Parse keywords: split by newline or comma
+    const keywords = rawKw.split(/[\n,]+/).map(k => k.trim()).filter(k => k.length > 0);
+    if (keywords.length < 2) { msgEl.innerHTML = `<span style="color:#f87171">Need at least 2 keywords</span>`; return; }
+
+    msgEl.innerHTML = `<span style="color:#fbbf24">Saving…</span>`;
+    try {
+      const res = await apiFetch("/api/niche/custom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, keywords }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      msgEl.innerHTML = `<span style="color:#34d399">✓ ${data.message}</span>`;
+      nameInput.value = "";
+      kwInput.value = "";
+      // Reload the niche list
+      setTimeout(() => _launchEndpoint("niche-finder"), 800);
+    } catch (err) {
+      msgEl.innerHTML = `<span style="color:#f87171">⚠ ${esc(err.message)}</span>`;
+    }
+  }
+
+  async function deleteNiche(name) {
+    if (!confirm(`Delete custom niche "${name}"?`)) return;
+    try {
+      const res = await apiFetch(`/api/niche/custom/${encodeURIComponent(name)}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      // Reload
+      _launchEndpoint("niche-finder");
+    } catch (err) {
+      alert("Failed to delete: " + err.message);
+    }
+  }
+
+  // ── Custom Category management ────────────────────────────
+  function _rebuildCategoryTabs() {
+    // Remove all existing category tabs (and the + button)
+    $tabs.querySelectorAll(".tab-btn.dyn-cat, .tab-btn.add-cat-btn").forEach(b => b.remove());
+    for (const cat of _categories) {
+      const btn = document.createElement("button");
+      btn.className = "tab-btn dyn-cat" + (_customCategoryMap[cat] !== undefined ? " custom-cat" : "");
+      btn.dataset.endpoint = `/api/category/${cat}`;
+      const icon = _customCategoryMap[cat] || CATEGORY_ICONS[cat] || "";
+      btn.textContent = (icon ? icon + " " : "") + cat;
+      // Add delete button for custom categories
+      if (_customCategoryMap[cat] !== undefined) {
+        const del = document.createElement("span");
+        del.className = "cat-del";
+        del.textContent = "✕";
+        del.onclick = (e) => { e.stopPropagation(); deleteCustomCategory(cat); };
+        btn.appendChild(del);
+      }
+      $tabs.appendChild(btn);
+    }
+    // Add the "+" button at the end
+    const addBtn = document.createElement("button");
+    addBtn.className = "tab-btn add-cat-btn";
+    addBtn.textContent = "＋ Add Category";
+    addBtn.onclick = () => openAddCatModal();
+    $tabs.appendChild(addBtn);
+  }
+
+  function openAddCatModal() {
+    document.getElementById("addCatOverlay").classList.add("open");
+    document.getElementById("catNameInput").focus();
+  }
+  function closeAddCatModal() {
+    document.getElementById("addCatOverlay").classList.remove("open");
+    document.getElementById("catFormMsg").innerHTML = "";
+  }
+  document.getElementById("addCatOverlay").addEventListener("click", (e) => {
+    if (e.target === document.getElementById("addCatOverlay")) closeAddCatModal();
+  });
+
+  async function addCustomCategory() {
+    const nameInput = document.getElementById("catNameInput");
+    const emojiInput = document.getElementById("catEmojiInput");
+    const qInput = document.getElementById("catQueriesInput");
+    const msgEl = document.getElementById("catFormMsg");
+    const name = nameInput.value.trim();
+    const emoji = emojiInput.value.trim() || "📂";
+    const raw = qInput.value.trim();
+    if (!name) { msgEl.innerHTML = `<span style="color:#f87171">Enter a category name</span>`; return; }
+    const queries = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+    if (queries.length < 2) { msgEl.innerHTML = `<span style="color:#f87171">Need at least 2 search queries</span>`; return; }
+
+    msgEl.innerHTML = `<span style="color:#fbbf24">Saving…</span>`;
+    try {
+      const res = await apiFetch("/api/category/custom", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, queries, emoji }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      msgEl.innerHTML = `<span style="color:#34d399">✓ ${data.message}</span>`;
+      nameInput.value = "";
+      emojiInput.value = "";
+      qInput.value = "";
+      // Reload categories and rebuild tabs
+      await _reloadCategories();
+      closeAddCatModal();
+      _renderWelcome();
+    } catch (err) {
+      msgEl.innerHTML = `<span style="color:#f87171">⚠ ${esc(err.message)}</span>`;
+    }
+  }
+
+  async function deleteCustomCategory(name) {
+    if (!confirm(`Delete custom category "${name}"?`)) return;
+    try {
+      const res = await apiFetch(`/api/category/custom/${encodeURIComponent(name)}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      await _reloadCategories();
+      // If the deleted category was active, go home
+      const activeBtn = $tabs.querySelector(".tab-btn.active");
+      if (activeBtn && activeBtn.dataset.endpoint === `/api/category/${name}`) {
+        _launchEndpoint("welcome");
+      }
+    } catch (err) {
+      alert("Failed to delete: " + err.message);
+    }
+  }
+
+  async function _reloadCategories() {
+    try {
+      const res = await fetch("/api/categories");
+      const { categories, customCategories } = await res.json();
+      _categories = categories;
+      _customCategoryMap = customCategories || {};
+      _rebuildCategoryTabs();
+    } catch (_) {}
+  }
+
+  async function scoreNiche(name) {
+    const safeId = name.replace(/\s+/g, '_');
+    const scoreArea = document.getElementById(`niche-score-${safeId}`);
+    if (!scoreArea) return;
+    scoreArea.innerHTML = `<div class="spinner" style="width:18px;height:18px;border-width:2px;margin:4px auto"></div>
+      <span style="font-size:.75rem;color:#fbbf24">Computing score… this may take a few minutes</span>`;
+
+    try {
+      const res = await apiFetch(`/api/niche/${encodeURIComponent(name)}/score`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const s = await res.json();
+      if (s.error) throw new Error(s.error);
+
+      const oppClass = s.opportunityScore >= 55 ? "opp-high" : s.opportunityScore >= 35 ? "opp-medium" : "opp-low";
+      const barColor = s.opportunityScore >= 55 ? "#34d399" : s.opportunityScore >= 35 ? "#fbbf24" : "#f87171";
+      scoreArea.innerHTML = `
+        <span class="opportunity-badge ${oppClass}">${s.opportunityScore}/100</span>
+        <div class="score-bar"><div class="score-bar-fill" style="width:${s.opportunityScore}%;background:${barColor}"></div></div>
+        <div class="niche-metrics">
+          <div class="niche-metric">Keywords: <strong>${s.keywordCount}</strong></div>
+          <div class="niche-metric">Avg Results: <strong>${s.avgResultsPerKeyword}</strong></div>
+          <div class="niche-metric">Saturation: <strong>${s.saturationPct}%</strong></div>
+          <div class="niche-metric">Gap (< 4★): <strong>${s.gapPct}%</strong></div>
+          <div class="niche-metric">Fresh Apps: <strong>${s.freshnessPct}%</strong></div>
+          <div class="niche-metric">Avg Installs: <strong>${formatNumber(s.avgInstalls)}</strong></div>
+        </div>`;
+      // Also make clicking open keywords
+      const card = document.getElementById(`niche-card-${safeId}`);
+      if (card) card.onclick = () => openNicheDetail(name);
+    } catch (err) {
+      scoreArea.innerHTML = `<span style="font-size:.75rem;color:#f87171">⚠ ${esc(err.message)}</span>`;
+    }
   }
 
   async function openNicheDetail(niche) {

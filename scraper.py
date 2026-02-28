@@ -15,6 +15,8 @@ from database import (
     get_cached_apps, save_apps,
     get_cached_keywords, save_keywords,
     log_query, seconds_since_last_query,
+    get_custom_niches,
+    get_custom_categories,
 )
 
 
@@ -189,6 +191,17 @@ class IPBlockedError(Exception):
     pass
 
 
+class CancelledError(Exception):
+    """Raised when a scraping operation is cancelled (user switched tabs)."""
+    pass
+
+
+def _check_cancelled(cancel_event):
+    """Raise CancelledError if the cancel event is set."""
+    if cancel_event is not None and cancel_event.is_set():
+        raise CancelledError("Scraping cancelled by client")
+
+
 def _check_blocked(exc):
     """Inspect an exception and raise IPBlockedError if it looks like a ban."""
     msg = str(exc).lower()
@@ -216,13 +229,28 @@ _consecutive_errors = 0  # for exponential backoff
 import threading
 _throttle_lock = threading.Lock()
 
-def _throttle():
+def _interruptible_sleep(seconds, cancel_event=None):
+    """Sleep that can be interrupted by a cancel event.
+    Checks the event every 0.5s instead of blocking for the full duration."""
+    if cancel_event is None:
+        time.sleep(seconds)
+        return
+    end = time.time() + seconds
+    while time.time() < end:
+        if cancel_event.is_set():
+            raise CancelledError("Scraping cancelled by client")
+        time.sleep(min(0.5, end - time.time()))
+
+
+def _throttle(cancel_event=None):
     """Enforce a global minimum gap between requests.
 
     Uses the database query_log so that even concurrent Flask
     requests (user switching tabs fast) are serialised.
+    If cancel_event is set, raises CancelledError immediately.
     """
     global _consecutive_errors
+    _check_cancelled(cancel_event)
 
     with _throttle_lock:
         # Check how long since the LAST request (any type)
@@ -233,22 +261,22 @@ def _throttle():
             wait += random.uniform(0, 3.0)
             print(f"  [THROTTLE] Last request was {elapsed:.1f}s ago. "
                   f"Waiting {wait:.1f}s…")
-            time.sleep(wait)
+            _interruptible_sleep(wait, cancel_event)
         else:
             # Still add a small human-like pause (1-4s)
-            time.sleep(random.uniform(1.0, 4.0))
+            _interruptible_sleep(random.uniform(1.0, 4.0), cancel_event)
 
         # 12% chance of a longer "reading" pause (5-10s)
         if random.random() < 0.12:
             extra = random.uniform(5.0, 10.0)
             print(f"  [PAUSE] Reading pause +{extra:.1f}s")
-            time.sleep(extra)
+            _interruptible_sleep(extra, cancel_event)
 
         # Exponential backoff when errors are piling up
         if _consecutive_errors > 0:
             backoff = min(2 ** _consecutive_errors, 60)
             print(f"  [BACKOFF] +{backoff}s (error streak: {_consecutive_errors})")
-            time.sleep(backoff)
+            _interruptible_sleep(backoff, cancel_event)
 
 def _record_success():
     global _consecutive_errors
@@ -259,23 +287,27 @@ def _record_error():
     _consecutive_errors += 1
 
 
-def _enforce_session_cooldown():
+def _enforce_session_cooldown(cancel_event=None):
     """If we scraped recently, wait until the cooldown period has passed."""
+    _check_cancelled(cancel_event)
     elapsed = seconds_since_last_query()
     if elapsed is not None and elapsed < SESSION_COOLDOWN:
         wait = SESSION_COOLDOWN - elapsed
         print(f"  [COOLDOWN] Last query was {elapsed:.0f}s ago. Waiting {wait:.0f}s…")
-        time.sleep(wait)
+        _interruptible_sleep(wait, cancel_event)
 
 
-def search_top_apps(query, count=100, country="us", lang="en"):
+def search_top_apps(query, count=100, country="us", lang="en", cancel_event=None):
     """Search Google Play and return up to `count` results."""
-    _throttle()
+    _throttle(cancel_event)
+    _check_cancelled(cancel_event)
     try:
         results = gps.search(query, lang=lang, country=country, n_hits=count)
         log_query("search", query)
         _record_success()
         return results
+    except CancelledError:
+        raise
     except Exception as e:
         _record_error()
         _check_blocked(e)
@@ -283,18 +315,30 @@ def search_top_apps(query, count=100, country="us", lang="en"):
         return []
 
 
-def get_app_details(app_id, country="us", lang="en"):
+def get_app_details(app_id, country="us", lang="en", cancel_event=None):
     """Return full details for a single app by its package id."""
-    _throttle()
+    _throttle(cancel_event)
+    _check_cancelled(cancel_event)
     try:
         details = gps.app(app_id, lang=lang, country=country)
         log_query("detail", app_id)
         _record_success()
         return details
+    except CancelledError:
+        raise
     except Exception as e:
         _record_error()
         _check_blocked(e)
         return None
+
+
+def _parse_installs(installs_str):
+    """Convert an installs string like '100,000,000+' to an integer."""
+    if isinstance(installs_str, (int, float)):
+        return int(installs_str)
+    if not installs_str:
+        return 0
+    return int(installs_str.replace(",", "").replace("+", "").strip() or 0)
 
 
 def deduplicate(apps_list):
@@ -309,14 +353,15 @@ def deduplicate(apps_list):
     return unique
 
 
-def enrich_apps(apps_list, country="us", lang="en"):
+def enrich_apps(apps_list, country="us", lang="en", cancel_event=None):
     """Fetch full details for each app (installs, ratings, genre, etc.)."""
     enriched = []
     for a in apps_list:
+        _check_cancelled(cancel_event)
         aid = a.get("appId")
         if not aid:
             continue
-        details = get_app_details(aid, country=country, lang=lang)
+        details = get_app_details(aid, country=country, lang=lang, cancel_event=cancel_event)
         if details:
             enriched.append(details)
         else:
@@ -339,25 +384,48 @@ GENERAL_QUERIES = [
 ]
 
 CATEGORY_QUERIES = {
-    "Games":         ["popular games", "top free games", "trending games", "best mobile games"],
-    "Social":        ["popular social media apps", "top social apps"],
-    "Entertainment": ["popular streaming apps", "entertainment apps", "top video apps"],
-    "Productivity":  ["popular productivity apps", "best productivity tools"],
-    "Anime":         [
+    # ── Original categories ──
+    "Games":            ["popular games", "top free games", "trending games", "best mobile games"],
+    "Social":           ["popular social media apps", "top social apps"],
+    "Entertainment":    ["popular streaming apps", "entertainment apps", "top video apps"],
+    "Productivity":     ["popular productivity apps", "best productivity tools"],
+    "Anime":            [
         "anime apps", "anime streaming", "anime games",
         "watch anime", "anime manga", "best anime app",
         "anime wallpaper", "anime drawing",
     ],
-    "Health":        ["health apps", "fitness apps", "workout apps", "calorie tracker", "meditation apps"],
-    "Finance":       ["finance apps", "budget apps", "investing apps", "crypto wallet", "banking apps"],
-    "Education":     ["education apps", "learning apps", "language learning", "study apps", "online courses"],
-    "AI":            ["ai apps", "ai assistant", "ai chat", "ai image generator", "chatgpt", "ai tools"],
-    "Crypto":        ["crypto apps", "bitcoin", "cryptocurrency", "nft apps", "defi wallet", "crypto trading"],
-    "Shopping":      ["shopping apps", "online shopping", "deals apps", "coupon apps"],
-    "Food":          ["food delivery apps", "recipe apps", "cooking apps", "meal planner"],
-    "Travel":        ["travel apps", "hotel booking", "flight booking", "trip planner"],
-    "Music":         ["music apps", "music streaming", "podcast apps", "music player"],
-    "Photography":   ["photo editor", "camera apps", "photo filter", "video editor"],
+    "Health":           ["health apps", "fitness apps", "workout apps", "calorie tracker", "meditation apps"],
+    "Finance":          ["finance apps", "budget apps", "investing apps", "crypto wallet", "banking apps"],
+    "Education":        ["education apps", "learning apps", "language learning", "study apps", "online courses"],
+    "AI":               ["ai apps", "ai assistant", "ai chat", "ai image generator", "chatgpt", "ai tools"],
+    "Crypto":           ["crypto apps", "bitcoin", "cryptocurrency", "nft apps", "defi wallet", "crypto trading"],
+    "Shopping":         ["shopping apps", "online shopping", "deals apps", "coupon apps"],
+    "Food":             ["food delivery apps", "recipe apps", "cooking apps", "meal planner"],
+    "Travel":           ["travel apps", "hotel booking", "flight booking", "trip planner"],
+    "Music":            ["music apps", "music streaming", "podcast apps", "music player"],
+    "Photography":      ["photo editor", "camera apps", "photo filter", "video editor"],
+    # ── Additional Google Play categories ──
+    "Art & Design":     ["art apps", "drawing apps", "design apps", "coloring apps", "sketch apps"],
+    "Auto & Vehicles":  ["car apps", "vehicle apps", "driving apps", "car maintenance", "auto insurance"],
+    "Beauty":           ["beauty apps", "makeup apps", "skincare apps", "hairstyle apps", "nail art apps"],
+    "Books & Reference":["ebook reader", "audiobooks", "dictionary apps", "library apps", "pdf reader"],
+    "Business":         ["business apps", "crm apps", "invoice apps", "project management", "meeting apps"],
+    "Comics":           ["comics app", "manga reader", "webtoon", "comic book reader", "webcomic apps"],
+    "Communication":    ["messaging apps", "chat apps", "video call apps", "email apps", "walkie talkie"],
+    "Dating":           ["dating apps", "matchmaking apps", "relationship apps", "singles apps"],
+    "Events":           ["event apps", "ticketing apps", "event planner", "concert apps", "meetup apps"],
+    "House & Home":     ["home design apps", "interior design", "real estate apps", "smart home", "furniture apps"],
+    "Libraries & Demo": ["demo apps", "library apps", "sample apps", "developer tools"],
+    "Lifestyle":        ["lifestyle apps", "daily routine", "horoscope apps", "journal apps", "quotes apps"],
+    "Maps & Navigation":["maps apps", "gps navigation", "offline maps", "traffic apps", "compass apps"],
+    "Medical":          ["medical apps", "symptom checker", "pill reminder", "doctor apps", "telehealth apps"],
+    "News & Magazines": ["news apps", "breaking news", "magazine apps", "newspaper apps", "rss reader"],
+    "Parenting":        ["parenting apps", "baby tracker", "pregnancy apps", "kids safety", "family apps"],
+    "Personalization":  ["wallpaper apps", "launcher apps", "icon packs", "widget apps", "theme apps"],
+    "Sports":           ["sports apps", "live scores", "fantasy sports", "sports news", "workout tracker"],
+    "Tools":            ["utility apps", "file manager", "calculator apps", "flashlight", "qr scanner"],
+    "Video Players":    ["video player", "media player", "movie apps", "streaming player", "video downloader"],
+    "Weather":          ["weather apps", "weather forecast", "weather radar", "storm tracker", "weather widget"],
 }
 
 # Anime-related search keywords to probe Google Play for popularity
@@ -439,7 +507,24 @@ NICHE_KEYWORD_SEEDS = {
 }
 
 
-def fetch_general_top(count=100, country="us", lang="en"):
+def get_all_niche_seeds():
+    """Return all niche keyword seeds: built-in + custom from DB."""
+    merged = dict(NICHE_KEYWORD_SEEDS)
+    merged.update(get_custom_niches())
+    return merged
+
+
+def get_all_categories():
+    """Return all category query mappings: built-in + custom from DB.
+    Returns dict  { category_name: [query_strings] }.
+    """
+    merged = dict(CATEGORY_QUERIES)
+    for cat in get_custom_categories():
+        merged[cat["name"]] = cat["queries"]
+    return merged
+
+
+def fetch_general_top(count=100, country="us", lang="en", cancel_event=None):
     """Return the top `count` most-downloaded general apps.
     Results are stored in / served from the SQLite database."""
     cache_key = f"general_top_{count}_{country}_{lang}"
@@ -449,22 +534,26 @@ def fetch_general_top(count=100, country="us", lang="en"):
         return cached
 
     print("  [SCRAPE] Fetching general top from Google Play…")
-    _enforce_session_cooldown()
+    _enforce_session_cooldown(cancel_event)
     all_results = []
     queries = list(GENERAL_QUERIES)
     random.shuffle(queries)
     for q in queries:
-        all_results.extend(search_top_apps(q, count=count, country=country, lang=lang))
+        _check_cancelled(cancel_event)
+        all_results.extend(search_top_apps(q, count=count, country=country, lang=lang, cancel_event=cancel_event))
 
     all_results = deduplicate(all_results)[:count]
-    all_results = enrich_apps(all_results, country=country, lang=lang)
+    # Derive realInstalls from the installs string when not already present
+    for a in all_results:
+        if "realInstalls" not in a:
+            a["realInstalls"] = _parse_installs(a.get("installs", "0"))
     all_results.sort(key=lambda a: a.get("realInstalls", 0), reverse=True)
     result = all_results[:count]
     save_apps(cache_key, result)
     return result
 
 
-def fetch_category_top(category_name, count=100, country="us", lang="en"):
+def fetch_category_top(category_name, count=100, country="us", lang="en", cancel_event=None):
     """Return the top `count` apps for a specific category.
     Results are stored in / served from the SQLite database."""
     cache_key = f"cat_{category_name}_{count}_{country}_{lang}"
@@ -474,31 +563,37 @@ def fetch_category_top(category_name, count=100, country="us", lang="en"):
         return cached
 
     print(f"  [SCRAPE] Fetching {category_name} from Google Play…")
-    _enforce_session_cooldown()
-    queries = list(CATEGORY_QUERIES.get(category_name, []))
+    _enforce_session_cooldown(cancel_event)
+    all_cats = get_all_categories()
+    queries = list(all_cats.get(category_name, []))
     random.shuffle(queries)
     cat_results = []
     for q in queries:
-        cat_results.extend(search_top_apps(q, count=count, country=country, lang=lang))
+        _check_cancelled(cancel_event)
+        cat_results.extend(search_top_apps(q, count=count, country=country, lang=lang, cancel_event=cancel_event))
 
     cat_results = deduplicate(cat_results)[:count]
-    cat_results = enrich_apps(cat_results, country=country, lang=lang)
+    # Derive realInstalls from the installs string when not already present
+    for a in cat_results:
+        if "realInstalls" not in a:
+            a["realInstalls"] = _parse_installs(a.get("installs", "0"))
     cat_results.sort(key=lambda a: a.get("realInstalls", 0), reverse=True)
     result = cat_results[:count]
     save_apps(cache_key, result)
     return result
 
 
-def fetch_anime_keywords(country="us", lang="en"):
+def fetch_anime_keywords(country="us", lang="en", cancel_event=None):
     """Return anime-related keywords ranked by result count on Google Play.
     Results are stored in / served from the SQLite database."""
-    return fetch_niche_keywords("Anime", country=country, lang=lang)
+    return fetch_niche_keywords("Anime", country=country, lang=lang, cancel_event=cancel_event)
 
 
-def fetch_niche_keywords(niche_name, country="us", lang="en"):
+def fetch_niche_keywords(niche_name, country="us", lang="en", cancel_event=None):
     """Return keywords for any niche ranked by result count.
     Results are stored in / served from the SQLite database."""
-    seeds = NICHE_KEYWORD_SEEDS.get(niche_name, [])
+    all_seeds = get_all_niche_seeds()
+    seeds = all_seeds.get(niche_name, [])
     if not seeds:
         return []
 
@@ -509,12 +604,14 @@ def fetch_niche_keywords(niche_name, country="us", lang="en"):
         return cached
 
     print(f"  [SCRAPE] Fetching {niche_name} keywords from Google Play…")
-    _enforce_session_cooldown()
+    _enforce_session_cooldown(cancel_event)
     keyword_results = []
     shuffled_seeds = list(seeds)
     random.shuffle(shuffled_seeds)
     for kw in shuffled_seeds:
-        _throttle()
+        _check_cancelled(cancel_event)
+        _throttle(cancel_event)
+        _check_cancelled(cancel_event)
         try:
             results = gps.search(kw, lang=lang, country=country, n_hits=30)
             _record_success()
@@ -522,6 +619,8 @@ def fetch_niche_keywords(niche_name, country="us", lang="en"):
                 "keyword": kw,
                 "resultCount": len(results),
             })
+        except CancelledError:
+            raise
         except Exception as e:
             _record_error()
             _check_blocked(e)
@@ -532,7 +631,7 @@ def fetch_niche_keywords(niche_name, country="us", lang="en"):
     return keyword_results
 
 
-def compute_niche_score(niche_name, country="us", lang="en"):
+def compute_niche_score(niche_name, country="us", lang="en", cancel_event=None):
     """Compute an opportunity score for a niche.
 
     The score considers:
@@ -545,21 +644,42 @@ def compute_niche_score(niche_name, country="us", lang="en"):
     from datetime import datetime, timedelta
 
     # 1. Keyword demand
-    kw_data = fetch_niche_keywords(niche_name, country=country, lang=lang)
+    kw_data = fetch_niche_keywords(niche_name, country=country, lang=lang, cancel_event=cancel_event)
     avg_results = sum(k["resultCount"] for k in kw_data) / max(len(kw_data), 1)
 
-    # 2. Grab category apps (use first matching category or niche name)
+    _check_cancelled(cancel_event)
+
+    # 2. Grab apps for analysis — try matching category first, else search keywords
     cat_key = None
     for k in CATEGORY_QUERIES:
         if niche_name.lower() in k.lower() or k.lower() in niche_name.lower():
             cat_key = k
             break
-    if not cat_key:
-        cat_key = niche_name
 
     apps = []
-    if cat_key in CATEGORY_QUERIES:
-        apps = fetch_category_top(cat_key, count=30, country=country, lang=lang)
+    if cat_key and cat_key in CATEGORY_QUERIES:
+        apps = fetch_category_top(cat_key, count=30, country=country, lang=lang, cancel_event=cancel_event)
+    else:
+        # No matching category — search using the niche's own keywords
+        all_seeds = get_all_niche_seeds()
+        seeds = all_seeds.get(niche_name, [])
+        search_kws = seeds[:5]  # use up to 5 keywords to build an app pool
+        seen_ids = set()
+        for sq in search_kws:
+            _check_cancelled(cancel_event)
+            results = search_top_apps(sq, count=30, country=country, lang=lang, cancel_event=cancel_event)
+            for r in results:
+                aid = r.get("appId")
+                if aid and aid not in seen_ids:
+                    seen_ids.add(aid)
+                    # Ensure realInstalls is populated from search results
+                    if not r.get("realInstalls") and r.get("installs"):
+                        r["realInstalls"] = _parse_installs(r["installs"])
+                    apps.append(r)
+            if len(apps) >= 30:
+                break
+        apps = apps[:30]
+        print(f"  [NICHE] Gathered {len(apps)} apps from keyword search for '{niche_name}'")
 
     total = max(len(apps), 1)
 
