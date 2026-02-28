@@ -5,6 +5,7 @@ A Flask-based dashboard that scrapes Google Play Store data to analyze top apps,
 > ⚠️ **Disclaimer:** This project is created strictly for **educational purposes**. The author takes no responsibility for any misuse or violations of Google's Terms of Service.
 
 ---
+https://ko-fi.com/ismailelbakkouchi Buy me a coffe Link ^^
 
 ## Features
 
