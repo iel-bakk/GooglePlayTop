@@ -3181,8 +3181,9 @@
 
     html += `</div>`;
 
-    const $content = document.getElementById("mainContent");
-    const grid = $content.querySelector('#appGrid');
+    const $mc = document.getElementById("content");
+    if (!$mc) return;
+    const grid = $mc.querySelector('#appGrid');
     if (grid) grid.insertAdjacentHTML('beforebegin', html);
   }
 
@@ -3218,9 +3219,10 @@
       <button id="filterReset" class="filter-control" style="background:var(--accent);color:#fff;cursor:pointer;border:none;padding:6px 12px;border-radius:8px">Reset</button>
     </div>`;
 
-    const $content = document.getElementById("mainContent");
-    const panel = $content.querySelector('.insights-panel');
-    const grid = $content.querySelector('#appGrid');
+    const $mc = document.getElementById("content");
+    if (!$mc) return;
+    const panel = $mc.querySelector('.insights-panel');
+    const grid = $mc.querySelector('#appGrid');
     if (panel) panel.insertAdjacentHTML('afterend', html);
     else if (grid) grid.insertAdjacentHTML('beforebegin', html);
   }
@@ -3389,8 +3391,8 @@
 
   // ── Category Comparison ─────────────────────────────────────
   async function loadCategoryComparison() {
-    const $content = document.getElementById("mainContent");
-    $content.innerHTML = `<h2 class="section-title">📊 Category Comparison</h2>
+    const $mc2 = document.getElementById("content");
+    $mc2.innerHTML = `<h2 class="section-title">📊 Category Comparison</h2>
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
         <div><label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px">Category A</label>
           <select id="compareA" class="filter-control" style="min-width:200px"></select></div>
