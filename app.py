@@ -460,6 +460,140 @@ def api_growth():
     return jsonify({"growth": growth_data[:100]})
 
 
+# ── Top Opportunities ──────────────────────────────────────────────────────
+@app.route("/api/opportunities")
+def api_opportunities():
+    """Scan all cached categories and rank them by opportunity score.
+
+    Signals combined (all computed from cached data — no scraping):
+      • qualityGap   : % of apps rated below 4.0 (higher = more room to compete)
+      • lowCompetition: % of apps under 1M installs (higher = easier to rank)
+      • devSpread    : ratio of unique developers to total apps (higher = less monopoly)
+      • paidGap      : % paid apps (niche with paid apps signals willingness to pay)
+      • avgRating    : avg rating of top apps (lower = user dissatisfaction)
+    """
+    from database import get_all_cached_apps, get_custom_categories
+    from scraper import get_all_categories
+
+    all_cached = get_all_cached_apps()
+    categories = get_all_categories()  # dict { name: [queries] }
+    custom_emojis = {c["name"]: c["emoji"] for c in get_custom_categories()}
+
+    # Build a cache_key -> label/emoji map
+    # Cache keys look like "cat_Photography_100_us_en" or "general_top_100_us_en"
+    cat_name_map = {}
+    for cat_name in categories:
+        possible_keys = [k for k in all_cached if k.startswith(f"cat_{cat_name}_")]
+        emoji = custom_emojis.get(cat_name, "📂")
+        for pk in possible_keys:
+            cat_name_map[pk] = {"name": cat_name, "emoji": emoji}
+    # Also handle general top
+    for k in all_cached:
+        if k.startswith("general_top_"):
+            cat_name_map[k] = {"name": "General Top", "emoji": "📱"}
+
+    opportunities = []
+
+    for cache_key, entry in all_cached.items():
+        apps = entry["apps"]
+        if not apps or len(apps) < 5:
+            continue
+
+        total = len(apps)
+        scored = [a for a in apps if a.get("score") and a["score"] > 0]
+
+        # Skip if no rating data
+        if not scored:
+            continue
+
+        avg_rating = sum(a["score"] for a in scored) / len(scored)
+        below_4 = sum(1 for a in scored if a["score"] < 4.0)
+        quality_gap_pct = (below_4 / len(scored)) * 100
+
+        # Install distribution
+        installs_list = [a.get("realInstalls", 0) for a in apps]
+        under_1m = sum(1 for i in installs_list if i < 1_000_000)
+        low_competition_pct = (under_1m / total) * 100
+        avg_installs = sum(installs_list) / total
+
+        # Developer concentration
+        devs = set()
+        dev_counts = {}
+        for a in apps:
+            d = a.get("developer", "Unknown")
+            devs.add(d)
+            dev_counts[d] = dev_counts.get(d, 0) + 1
+        unique_devs = len(devs)
+        dev_spread = unique_devs / total  # 1.0 = every app from different dev
+        top_dev_share = max(dev_counts.values()) / total if dev_counts else 0
+
+        # Paid apps signal
+        paid_count = sum(1 for a in apps if not a.get("free", True))
+        paid_pct = (paid_count / total) * 100
+
+        # Opportunity score (0-100)
+        # Quality gap: more low-rated apps = more opportunity (max 30pts)
+        gap_score = min(quality_gap_pct / 100 * 30, 30)
+        # Low competition: more apps under 1M installs = easier entry (max 25pts)
+        comp_score = min(low_competition_pct / 100 * 25, 25)
+        # Dev spread: higher diversity = less monopoly (max 20pts)
+        spread_score = dev_spread * 20
+        # Low avg rating: users are unsatisfied (max 15pts)
+        rating_score = max(0, (4.5 - avg_rating) / 2 * 15)
+        # Paid signal: presence of paid apps = monetization (max 10pts)
+        paid_score = min(paid_pct / 20 * 10, 10)
+
+        total_score = round(gap_score + comp_score + spread_score + rating_score + paid_score, 1)
+
+        # Determine label
+        cat_info = cat_name_map.get(cache_key, None)
+        label = cat_info["name"] if cat_info else cache_key.replace("cat_", "").replace("_", " ").title()
+        emoji = cat_info["emoji"] if cat_info else "📂"
+
+        # Find specific quality gap apps (best opportunities within this category)
+        gap_apps = [a for a in scored if a["score"] < 3.8 and a.get("realInstalls", 0) > 50000]
+        gap_apps.sort(key=lambda a: a.get("realInstalls", 0), reverse=True)
+
+        opportunities.append({
+            "category": cache_key,
+            "label": label,
+            "emoji": emoji,
+            "score": total_score,
+            "totalApps": total,
+            "avgRating": round(avg_rating, 2),
+            "qualityGapPct": round(quality_gap_pct, 1),
+            "lowCompetitionPct": round(low_competition_pct, 1),
+            "devSpread": round(dev_spread, 2),
+            "uniqueDevs": unique_devs,
+            "topDevShare": round(top_dev_share * 100, 1),
+            "paidPct": round(paid_pct, 1),
+            "avgInstalls": int(avg_installs),
+            "gapApps": [{
+                "appId": a.get("appId", ""),
+                "title": a.get("title", ""),
+                "score": a.get("score", 0),
+                "installs": a.get("realInstalls", 0),
+                "developer": a.get("developer", ""),
+            } for a in gap_apps[:3]],
+            "breakdown": {
+                "qualityGap": round(gap_score, 1),
+                "lowCompetition": round(comp_score, 1),
+                "devDiversity": round(spread_score, 1),
+                "userDissatisfaction": round(rating_score, 1),
+                "monetization": round(paid_score, 1),
+            },
+            "fetchedAt": entry["fetchedAt"],
+        })
+
+    # Sort by score descending
+    opportunities.sort(key=lambda x: x["score"], reverse=True)
+
+    return jsonify({
+        "opportunities": opportunities,
+        "totalCategories": len(opportunities),
+    })
+
+
 @app.route("/api/niche/<niche_name>/keywords")
 def api_niche_keywords(niche_name):
     """Return keyword popularity data for a given niche."""

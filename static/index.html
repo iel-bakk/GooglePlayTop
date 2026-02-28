@@ -1012,6 +1012,76 @@
     .growth-up { color: var(--green); }
     .growth-new { color: var(--yellow); font-style: italic; }
 
+    /* ── Opportunity Cards ─────────────────────────────────── */
+    .opp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .opp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      transition: border-color .2s, transform .15s;
+    }
+    .opp-card:hover {
+      border-color: var(--accent-soft);
+      transform: translateY(-2px);
+    }
+    .opp-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .opp-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .opp-score-badge {
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 12px;
+      min-width: 48px;
+      text-align: center;
+    }
+    .opp-score-high { background: rgba(34,197,94,.15); color: #22c55e; }
+    .opp-score-mid  { background: rgba(250,204,21,.15); color: #facc15; }
+    .opp-score-low  { background: rgba(239,68,68,.15);  color: #ef4444; }
+    .opp-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+      font-size: .82rem;
+      margin-bottom: 12px;
+    }
+    .opp-metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .opp-metric-label { color: var(--text-secondary); }
+    .opp-metric-value { font-weight: 600; }
+    .opp-breakdown {
+      display: flex;
+      gap: 4px;
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .opp-breakdown > div { border-radius: 3px; }
+    .opp-gap-apps {
+      font-size: .78rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+    }
+    .opp-gap-apps strong { color: var(--text); font-weight: 500; }
+
     /* ── Note form in modal ────────────────────────────────── */
     .note-section {
       margin-top: 18px;
@@ -3392,6 +3462,7 @@
   // ── Category Comparison ─────────────────────────────────────
   async function loadCategoryComparison() {
     const $mc2 = document.getElementById("content");
+    if (!$mc2) return;
     $mc2.innerHTML = `<h2 class="section-title">📊 Category Comparison</h2>
       <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:end">
         <div><label style="display:block;font-size:12px;color:var(--text-secondary);margin-bottom:4px">Category A</label>
@@ -3572,6 +3643,98 @@
     setTimeout(()=>t.remove(), 2500);
   }
 
+  // ── Top Opportunities ────────────────────────────────────────
+  async function loadOpportunities() {
+    const el = document.getElementById('opportunitiesContent');
+    if (!el) return;
+    try {
+      const res = await apiFetch('/api/opportunities');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      el.innerHTML = renderOpportunities(data);
+    } catch(e) {
+      el.innerHTML = `<div class="error">⚠️ ${esc(e.message)}</div>`;
+    }
+  }
+
+  function renderOpportunities(data) {
+    const opps = data.opportunities || [];
+    if (!opps.length) {
+      return `<div style="padding:24px;text-align:center;color:var(--text-secondary)">
+        <p style="font-size:1.2rem;margin-bottom:8px">🏆 No data yet</p>
+        <p>Browse some categories first so the cache has data to analyze.<br>
+        The scheduler (<code>python3 scheduler.py</code>) will auto-populate all categories.</p>
+      </div>`;
+    }
+
+    let html = `<div style="margin-bottom:16px">
+      <h3 style="margin:0 0 4px">🏆 Top Opportunities</h3>
+      <p style="color:var(--text-secondary);font-size:.82rem;margin:0">
+        Ranked by opportunity score — combining quality gaps, competition level, developer diversity, user dissatisfaction, and monetization signals.
+        Based on ${data.totalCategories} cached categories.
+      </p>
+    </div>`;
+
+    html += `<div class="opp-grid">`;
+
+    opps.forEach((opp, i) => {
+      const scoreClass = opp.score >= 50 ? 'opp-score-high' : opp.score >= 30 ? 'opp-score-mid' : 'opp-score-low';
+      const bd = opp.breakdown;
+      const total = bd.qualityGap + bd.lowCompetition + bd.devDiversity + bd.userDissatisfaction + bd.monetization;
+      const pct = (v) => total > 0 ? Math.round(v/total*100) : 0;
+
+      html += `<div class="opp-card">
+        <div class="opp-card-header">
+          <span class="opp-card-title">${opp.emoji} ${esc(opp.label)}</span>
+          <span class="opp-score-badge ${scoreClass}">${opp.score}</span>
+        </div>
+
+        <div class="opp-breakdown" title="Score breakdown">
+          <div style="width:${pct(bd.qualityGap)}%;background:#ef4444" title="Quality Gap: ${bd.qualityGap}"></div>
+          <div style="width:${pct(bd.lowCompetition)}%;background:#3b82f6" title="Low Competition: ${bd.lowCompetition}"></div>
+          <div style="width:${pct(bd.devDiversity)}%;background:#8b5cf6" title="Dev Diversity: ${bd.devDiversity}"></div>
+          <div style="width:${pct(bd.userDissatisfaction)}%;background:#f59e0b" title="User Dissatisfaction: ${bd.userDissatisfaction}"></div>
+          <div style="width:${pct(bd.monetization)}%;background:#22c55e" title="Monetization: ${bd.monetization}"></div>
+        </div>
+
+        <div class="opp-metrics">
+          <div class="opp-metric"><span class="opp-metric-label">Avg Rating</span><span class="opp-metric-value">⭐ ${opp.avgRating}</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Quality Gap</span><span class="opp-metric-value">${opp.qualityGapPct}%</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Low Competition</span><span class="opp-metric-value">${opp.lowCompetitionPct}%</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Unique Devs</span><span class="opp-metric-value">${opp.uniqueDevs}</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Top Dev Share</span><span class="opp-metric-value">${opp.topDevShare}%</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Paid Apps</span><span class="opp-metric-value">${opp.paidPct}%</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Total Apps</span><span class="opp-metric-value">${opp.totalApps}</span></div>
+          <div class="opp-metric"><span class="opp-metric-label">Avg Installs</span><span class="opp-metric-value">${formatNumber(opp.avgInstalls)}</span></div>
+        </div>`;
+
+      // Show quality gap apps if any
+      if (opp.gapApps && opp.gapApps.length) {
+        html += `<div class="opp-gap-apps">
+          <strong>⚠️ Weak competitors:</strong><br>`;
+        opp.gapApps.forEach(a => {
+          html += `<span style="cursor:pointer;text-decoration:underline dotted" onclick="openAppDetail('${esc(a.appId)}')">${esc(a.title)}</span> (⭐${a.score.toFixed(1)}, ${formatNumber(a.installs)} installs)<br>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+    });
+
+    html += `</div>`;
+
+    // Legend
+    html += `<div style="margin-top:16px;font-size:.75rem;color:var(--text-secondary);display:flex;gap:16px;flex-wrap:wrap">
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ef4444;margin-right:4px"></span>Quality Gap</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3b82f6;margin-right:4px"></span>Low Competition</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#8b5cf6;margin-right:4px"></span>Dev Diversity</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f59e0b;margin-right:4px"></span>User Dissatisfaction</span>
+      <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22c55e;margin-right:4px"></span>Monetization</span>
+    </div>`;
+
+    return html;
+  }
+
   // Re-attach card clicks after filter changes
   function _attachCardClicks() {
     document.querySelectorAll('.card-link').forEach(el => {
@@ -3605,13 +3768,18 @@
       <h2 class="section-title">📊 App Analysis & Comparison</h2>
 
       <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-        <button class="toolbar-btn" onclick="showAnalysisSection('compare')" id="analysisTabCompare" style="background:var(--accent);color:#fff">🔍 App Comparison</button>
+        <button class="toolbar-btn" onclick="showAnalysisSection('opportunities')" id="analysisTabOpportunities" style="background:var(--accent);color:#fff">🏆 Top Opportunities</button>
+        <button class="toolbar-btn" onclick="showAnalysisSection('compare')" id="analysisTabCompare">🔍 App Comparison</button>
         <button class="toolbar-btn" onclick="showAnalysisSection('growth')" id="analysisTabGrowth">📈 Growth Velocity</button>
         <button class="toolbar-btn" onclick="showAnalysisSection('catcompare')" id="analysisTabCatCompare">📊 Category Comparison</button>
         <button class="toolbar-btn" onclick="showAnalysisSection('bookmarks')" id="analysisTabBookmarks">⭐ Bookmarks</button>
       </div>
 
-      <div id="analysisSectionCompare" class="analysis-panel">
+      <div id="analysisSectionOpportunities" class="analysis-panel">
+        <div id="opportunitiesContent"><div class="loading"><div class="spinner"></div> Analyzing all categories...</div></div>
+      </div>
+
+      <div id="analysisSectionCompare" class="analysis-panel" style="display:none">
         <p style="font-size:.85rem;color:#9ca3af;margin-bottom:16px">
           Select two apps to compare their descriptions (word overlap) and view install growth from snapshots.
           You can also paste a package ID directly.
@@ -3651,6 +3819,9 @@
       </div>
     `;
 
+    // Preload opportunities
+    loadOpportunities();
+
     // Preload growth data
     loadGrowthData().then(data => {
       const el = document.getElementById('growthContent');
@@ -3662,11 +3833,12 @@
   }
 
   window.showAnalysisSection = function(which) {
-    ['compare','growth','catcompare','bookmarks'].forEach(s => {
-      const el = document.getElementById('analysisSection' + s.charAt(0).toUpperCase() + s.slice(1));
-      const tab = document.getElementById('analysisTab' + s.charAt(0).toUpperCase() + s.slice(1));
-      if (el) el.style.display = s===which ? '' : 'none';
-      if (tab) { tab.style.background = s===which ? 'var(--accent)' : ''; tab.style.color = s===which ? '#fff' : ''; }
+    const idMap = {opportunities:'Opportunities', compare:'Compare', growth:'Growth', catcompare:'CatCompare', bookmarks:'Bookmarks'};
+    Object.entries(idMap).forEach(([key, suffix]) => {
+      const el = document.getElementById('analysisSection' + suffix);
+      const tab = document.getElementById('analysisTab' + suffix);
+      if (el) el.style.display = key===which ? '' : 'none';
+      if (tab) { tab.style.background = key===which ? 'var(--accent)' : ''; tab.style.color = key===which ? '#fff' : ''; }
     });
 
     // Load category comparison on demand

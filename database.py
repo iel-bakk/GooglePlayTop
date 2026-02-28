@@ -351,6 +351,26 @@ def get_cache_status():
     return result
 
 
+def get_all_cached_apps():
+    """Return ALL cached app data keyed by cache_key (ignoring TTL).
+
+    Returns: { cache_key: [app_dicts, ...] }
+    """
+    conn = _connect()
+    rows = conn.execute(
+        "SELECT cache_key, app_data, fetched_at FROM app_cache"
+    ).fetchall()
+    conn.close()
+
+    result = {}
+    for r in rows:
+        result[r["cache_key"]] = {
+            "apps": json.loads(r["app_data"]),
+            "fetchedAt": r["fetched_at"],
+        }
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Custom niches
 # ---------------------------------------------------------------------------
