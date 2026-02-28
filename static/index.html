@@ -500,6 +500,73 @@
       border-radius: var(--radius-sm);
       object-fit: cover;
       flex-shrink: 0;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .detail-screenshots img:hover {
+      opacity: .8;
+    }
+
+    /* ── Screenshot Lightbox ─────────────────────────────── */
+    .screenshot-lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0,0,0,.92);
+      align-items: center;
+      justify-content: center;
+    }
+    .screenshot-lightbox.active { display: flex; }
+    .screenshot-lightbox img {
+      max-width: 90vw;
+      max-height: 88vh;
+      border-radius: 8px;
+      object-fit: contain;
+      user-select: none;
+    }
+    .lb-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      opacity: .7;
+      transition: opacity .15s;
+    }
+    .lb-close:hover { opacity: 1; }
+    .lb-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.12);
+      border: none;
+      color: #fff;
+      font-size: 1.6rem;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: .7;
+      transition: opacity .15s, background .15s;
+    }
+    .lb-nav:hover { opacity: 1; background: rgba(255,255,255,.22); }
+    .lb-prev { left: 16px; }
+    .lb-next { right: 16px; }
+    .lb-counter {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,.7);
+      font-size: .85rem;
     }
 
     .detail-footer {
@@ -2723,10 +2790,11 @@
     let screenshotHtml = "";
     if (app.screenshots && app.screenshots.length) {
       screenshotHtml = `<div class="detail-screenshots">`;
-      for (const src of app.screenshots) {
-        screenshotHtml += `<img src="${src}" alt="screenshot" loading="lazy" />`;
-      }
+      app.screenshots.forEach((src, i) => {
+        screenshotHtml += `<img src="${src}" alt="screenshot" loading="lazy" onclick="openScreenshotLightbox(window.__detailScreenshots, ${i})" />`;
+      });
       screenshotHtml += `</div>`;
+      window.__detailScreenshots = app.screenshots;
     }
 
     return `
@@ -4124,7 +4192,55 @@
       },
     });
   }
+
+  /* ── Screenshot Lightbox ────────────────────────────── */
+  let _lbScreenshots = [];
+  let _lbIndex = 0;
+
+  function openScreenshotLightbox(screenshots, index) {
+    _lbScreenshots = screenshots;
+    _lbIndex = index;
+    const lb = document.getElementById("screenshotLightbox");
+    lb.classList.add("active");
+    _lbRender();
+    document.addEventListener("keydown", _lbKey);
+  }
+
+  function closeScreenshotLightbox() {
+    document.getElementById("screenshotLightbox").classList.remove("active");
+    document.removeEventListener("keydown", _lbKey);
+  }
+
+  function _lbNav(dir) {
+    _lbIndex = (_lbIndex + dir + _lbScreenshots.length) % _lbScreenshots.length;
+    _lbRender();
+  }
+
+  function _lbRender() {
+    document.getElementById("lbImg").src = _lbScreenshots[_lbIndex];
+    document.getElementById("lbCounter").textContent =
+      `${_lbIndex + 1} / ${_lbScreenshots.length}`;
+    // hide nav arrows if only one image
+    const hide = _lbScreenshots.length <= 1;
+    document.getElementById("lbPrev").style.display = hide ? "none" : "";
+    document.getElementById("lbNext").style.display = hide ? "none" : "";
+  }
+
+  function _lbKey(e) {
+    if (e.key === "Escape") closeScreenshotLightbox();
+    else if (e.key === "ArrowLeft") _lbNav(-1);
+    else if (e.key === "ArrowRight") _lbNav(1);
+  }
 </script>
+
+<!-- Screenshot Lightbox -->
+<div class="screenshot-lightbox" id="screenshotLightbox" onclick="if(event.target===this)closeScreenshotLightbox()">
+  <button class="lb-close" onclick="closeScreenshotLightbox()" title="Close">&times;</button>
+  <button class="lb-nav lb-prev" id="lbPrev" onclick="event.stopPropagation();_lbNav(-1)" title="Previous">&#8249;</button>
+  <img id="lbImg" src="" alt="screenshot" />
+  <button class="lb-nav lb-next" id="lbNext" onclick="event.stopPropagation();_lbNav(1)" title="Next">&#8250;</button>
+  <span class="lb-counter" id="lbCounter"></span>
+</div>
 
 </body>
 </html>
