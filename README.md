@@ -202,8 +202,3 @@ The scraper includes several layers to avoid Google Play IP bans:
 MIT — free to use for learning, research, and personal projects.
 
 ---
-
-## Suggested GitHub Topics
-
-Add these topics to your repo for better discoverability:
-`google-play` `android` `app-store-optimization` `aso` `market-research` `scraper` `flask` `python` `analytics` `dashboard` `keyword-research` `competitor-analysis`
